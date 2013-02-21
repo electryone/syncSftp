@@ -1,0 +1,330 @@
+#!/usr/bin/env python
+"""
+ For Linux2Linux
+ The script is usable 4 the environment of linux2Linux . If u'r in any other os environment.
+ Please using the version script based on the os.
+
+
+ Version:1.1
+ syncSftp.py 
+ Author:Jackie Ma <jacknet.ma@gmail.com>
+ Please report bug to me.
+
+ Sync the modified files by sftp protocol.
+
+"""
+
+import paramiko
+import os, sys
+import time
+
+##### get current time & store it####
+def getCurTime():
+    f = open('currentTime', 'w')
+    f.write(str(time.time()))
+    f.close()
+
+
+
+class syncSftp:
+########## Variables #########
+    ### the remote file list. The file's path is absolute path. ####
+    _rFList = []
+
+    ### the local file list. The file's path is absolute path. ####
+    _lFList = []
+
+    #### The modified files list in the remote. The file's path is absolute path. ####
+    _rMFList = []
+
+    #### The dir list about the remote directory architecture ###
+    #_dirs = []
+
+    ### The local dir list to be created according to remote dirs ####
+    _newLocalDirs = []
+
+    ### The local dir list to be created according to remote dirs ####
+    _newRemoteDirs = []
+
+    ####### the local dir list from local dir.##########
+    _lDirs = []
+
+    ####### the local file list to be modified #
+    _localFile = []
+
+    ##### the Last check time. In the other words, it's the time run this program last time.###
+    _lastCheckTime = 0
+
+
+#######################################################
+    def __init__(self, hostname, username, password, port, desDir, localDir):
+        self.hostname = hostname
+        self.username = username
+        self.password = password
+        self.port = port
+        self.desDir = desDir
+        self.localDir = localDir
+        #### Some Initial action ######
+        self.checkPath(self.localDir)
+        self.checkPath(self.desDir)
+        self.createIniDir()
+
+
+##################################### Some Utilities ##########################################
+###### Check the path that client enter. The path must be abosulte and standard. ########
+    def checkPath(self, path):
+        if os.path.isabs(path):
+            pass
+        else:
+            print "Error path: %s: Please enter the absolute path." % (path)
+            sys.exit(1)
+
+
+
+###### Convert path to list #####
+    def path2list(self, path):
+        #path = os.path.normpath(path)
+        plist = path.split('/')[1:]
+        return plist
+
+
+##### Convert list to path ######
+    def list2path(self, list):
+        n = 0
+        path = ''
+        while n < len(list):
+            path = path + '/' + list[n]
+            n = n + 1
+        return path
+
+##### Check if a path is exist by sftp. Return True or False. #####
+    def pathExistsSftp(self, path):
+        try:
+            self.sftp.stat(path)
+        except:
+            #print "pathExistsSftp: The path is not exist: %s" (path)
+            return False
+        else:
+            return True
+
+
+
+###### Create the dir that isn't exist. #######
+    def createNotExistDir(self, dir):
+        if not os.path.exists(dir):
+            print "\tCreate the dir: %s" % (dir)
+            os.makedirs(dir)
+
+###### Create the dir that isn't exist by sftp. #######
+    def createNotExistDirSftp(self, dir):
+        #print "createNotExistDirSftp():"
+        if not  self.pathExistsSftp(dir):
+            print "\tCreate the dir: %s" % (dir)
+            self.sftp.mkdir(dir)
+
+
+###### Converting the path to a new path(dir2 + dir1's basename + path) according to dir1's basename and dir2. ########### 
+    def path2nPath(self, dir1, dir2, path):
+        ### Normalizing these paths #####
+        dir2 = os.path.normpath(dir2)
+        ###########
+        dirBase = os.path.basename(dir1)
+        pathList = self.path2list(path)
+        baseNameLoc = pathList.index(dirBase)
+        nPathList = pathList[baseNameLoc:]
+        #nPath = self.list2path(nPathList)
+        nPath = dir2 + self.list2path(nPathList)
+        return nPath
+
+###### Get the modified files list from last check. Chop off the redundant attributes #####
+    def mfsInfo(self, fs):
+        mfs = []
+        for f in fs:
+            if f[0] != 'd' and f[1] > self._lastCheckTime:
+                mfs.append(f[2])
+        print "\tThe number of file to be modified are: %s" % len(mfs)
+        return mfs
+
+###### get all the dir list from a parent dir.Please notice the format of pDir list. #####
+    def dirList(self, pDir):
+        dirs = []
+        for f in pDir:
+            if f[0] == "d":
+                dirs.append(f)
+        return dirs
+
+
+
+################################# Utilities Ends #########################################
+
+
+
+
+###### Create the initial directory in the local ###
+    def createIniDir(self):
+        dirBase = os.path.basename(self.desDir)
+        #print "createInidir():dirBase: %s" % (dirBase)
+        iniDir = os.path.join(self.localDir, dirBase)
+        self.createNotExistDir(iniDir)
+
+
+###### Rebuilding the local dirs list to be created according to remote dirs. Chop off the redundant attributes. #########
+    def buildLDirList(self):
+        rDirs = self.dirList(self._rFList)
+        for d in rDirs:
+            d = d[2] 
+            lDir = self.path2nPath(self.desDir, self.localDir, d)
+            self._newLocalDirs.append(lDir)
+            
+###### Rebuilding the remote dirs list to be created according to local dirs. Chop off the redundant attributes. #########
+    def buildRDirList(self):
+        lDirs = self.dirList(self._lFList)
+        for d in lDirs:
+            d = d[2]
+            rDir = self.path2nPath(self.desDir, os.path.split(self.desDir)[0], d)
+            self._newRemoteDirs.append(rDir)
+
+
+
+###### get the local file list that to be modified ####
+    def getLocalFileInfo(self):
+        for f in self._rMFList:
+            lFile = self.path2nPath(self.desDir, self.localDir, f)
+            self._localFile.append(lFile)
+
+
+###### create the local dirs according to remote dirs ####
+    def createLocalDir(self):
+        for dir in self._newLocalDirs:
+            self.createNotExistDir(dir)
+            
+###### create the remote dirs according to local dirs ####
+    def createRemoteDir(self):
+        #print "createRemoteDir():"
+        for dir in self._newRemoteDirs:
+            #print "createRemoteDir(): dir: %s" % (dir)
+            self.createNotExistDirSftp(dir)
+
+
+##### connect to remote host by ssh ###
+    def sshConn(self):
+        paramiko.util.log_to_file('paramiko.log')
+        t = paramiko.Transport((self.hostname, self.port))
+        self.t = t
+        try:
+            t.connect(username=self.username, password=self.password)
+        except Exception, err:
+            print " Failure: Connect remote host: %s" % err
+            print "Quiting, please wait for a moment..."
+            sys.exit(1)
+        print 'Successful: ssh connection'
+        self.sftp = paramiko.SFTPClient.from_transport(t)
+
+
+##### Get the remote files list from remote dir. The list contain some attributes.#####
+    def rFListInfo(self, dir):
+        #dir = os.path.normpath(dir)
+        fs = self.sftp.listdir(dir)
+        for f in fs:
+            #fPath = os.path.join(dir, f)
+            fPath = dir + '/' + f
+            fstat = self.sftp.stat(fPath)
+            fType = str(fstat)[0]
+            fMtime = fstat.st_mtime
+            if fType == "d":
+                self._rFList.append(('d', fMtime, fPath))
+                self.rFListInfo(fPath)
+            else:
+                #self._rFList.append(fPath)
+                self._rFList.append(('f', fMtime, fPath))
+
+####### Get the local file list from local dir. The list contains some attributes. ############
+    def lFListInfo(self, dir):
+        fs = os.listdir(dir)
+        for f in fs:
+            fPath = os.path.join(dir, f)
+            fMtime = os.stat(fPath).st_mtime
+            if os.path.isdir(fPath):
+                self._lFList.append(('d', fMtime, fPath))
+                self.lFListInfo(fPath)
+            else:
+                self._lFList.append(('f', fMtime, fPath))
+
+
+
+
+###### get the last modified time #######
+    def getLastCheckTime(self):
+        if os.path.isfile('currentTime'):
+            f = open('currentTime', 'r')
+            self._lastCheckTime = float(f.read())
+            f.close()
+            if self._lastCheckTime == 0:
+                print "Initializing sync.."
+            else:
+                print "Last check Time: %s" % (time.strftime("%Y-%m-%d,%H:%M:%S",time.localtime(self._lastCheckTime)))
+        else:
+            print "Initializing sync.."
+
+
+
+########## Get the modified files from remote dir #####
+    def getRMFList(self):
+        print "Modifying local.."
+        self.createLocalDir()
+        self._rMFList = self.mfsInfo(self._rFList)
+        #self.sftp.get('/opt/Twisted/clientFactory.py', os.path.join('/tmp', 'clientFactory.py'))
+        for f in self._rMFList:
+            ###### The new local path to get the modified file ######
+            lf = self.path2nPath(self.desDir, self.localDir, f)
+            try:
+                print "\tGetting the file:%s.." % (f) 
+                self.sftp.get(f, lf)
+            except IOError, e:
+                print "\tFailure: Getting %s: %s" % (f, e)
+                sys.exit(1)
+
+########## Put the modified files from local dir to the remote dir ####
+    def getLMFList(self):
+        print "Modifying remote.."
+        self.createRemoteDir()
+        self._lMFList = self.mfsInfo(self._lFList)
+        for f in self._lMFList:
+            ##### The new remote path to put the modified file ####
+            rf = self.path2nPath(self.desDir, os.path.split(self.desDir)[0], f)
+            #print "getLMFList():rf: %s" % (rf)
+            try:
+                print "\tPutting the file:%s.." % (f) 
+                self.sftp.put(f, rf)
+            except IOError, e:
+                print "\tFailure: Putting %s: %s" % (f, e)
+                sys.exit(1)
+
+
+
+#####  close ssh connection ###
+    def sshClose(self):
+        self.t.close()
+
+
+
+if __name__ == "__main__":
+    #self-test code
+    #getCurTime()
+    x = syncSftp('172.16.200.153', 'tcc', 'tcc', 22, '/opt/zenpacks', '/tmp')
+    x.sshConn()
+    #print x.pathExistsSftp('/opt/zenpacks/dir789')
+    #x.createNotExistDirSftp('/opt/zenpacks/dir789')
+    x.rFListInfo('/opt/zenpacks')
+    x.lFListInfo('/tmp/zenpacks')
+    #print x._rFList
+    #print x._lFList
+    x.buildLDirList()
+    x.buildRDirList()
+    x.getLastCheckTime()
+    #x.getLocalFileInfo()
+    x.getRMFList()
+    x.getLMFList()
+    x.sshClose()
+    getCurTime()
+    print "\nSync finished."
