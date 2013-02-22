@@ -2,7 +2,7 @@
 """
  For Linux2Linux
  The script is usable 4 the environment of linux2Linux . If u'r in any other os environment.
- Please using the version script based on the os.
+ Please using which version the script based on the os.
 
 
  Copyright (c) 2013-02-21 Jackie
