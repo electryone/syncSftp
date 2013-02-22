@@ -1,8 +1,0 @@
-1. Getting sftp server time.Putting the time as currentTime.
-2. Checking the path user inputted, converting the path to the standard path(doesn't end with '/'), just like '/opt/OOP'.
-Done 
-3. Handling some link file.
-4. Bug, if it's failure modified some file. Next time, the file won't be
-modified, because the currentTime file be modified.
-5. Bug, it  has no any notification when modifying single directory that there are no any files in the
-directory. 
