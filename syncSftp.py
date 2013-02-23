@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+############################################################
 """
  For Linux2Linux
  The script is usable 4 the environment of linux2Linux . If u'r in any other os environment.
@@ -15,6 +15,8 @@
  Sync the modified files by sftp protocol.
 
 """
+############################################################
+
 
 import paramiko
 import os, sys
