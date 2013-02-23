@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 ############################################################
 """
  For Linux2Linux
@@ -16,6 +15,8 @@
  Sync the modified files by sftp protocol.
 
 """
+############################################################
+
 
 import paramiko
 import os, sys
