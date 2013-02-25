@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import paramiko
+from sftp.sftpPath import sftpPath 
 
 class test:
     def __init__(self):
@@ -12,6 +13,9 @@ class test:
         self.sftp = paramiko.SFTPClient.from_transport(t)
         #print sftp.stat('/opt/zenpacks/dir2/2.1')
         #print sftp.listdir('/opt/zenpacks/dir2/2.1')
+        #sftpPath = sftp.path()
+        #print sftpPath.exists('/tmp/dir')
+        print sftpPath(self.sftp).exists('/tmp/dir1')
 
     def testList():
         l = ['a', 'b']
@@ -93,10 +97,9 @@ class test:
 
 if __name__ == "__main__":
     #a = mysum([1, 2, 3, 4, 5])
-    print 'a'
     x = test()
     x.sshConn()
     #print sftpGetFtree('/opt/zenpacks/dir2')
     #print a, len(a)
     #print x.sftpPathIsdir('/tmp/dir2')
-    x.sftpRmtree('/tmp/dir1')
+    #x.sftpRmtree('/tmp/dir1')

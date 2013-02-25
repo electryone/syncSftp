@@ -21,6 +21,8 @@
 import paramiko
 import os, sys
 import time, shutil
+from sftp.sftpPath import sftpPath
+from sftp.sftpUtils import sftpUtils 
 
 ##### get current time & store it####
 def getCurTime():
@@ -110,31 +112,11 @@ class syncSftp:
             n = n + 1
         return path
 
-##### Check if a path is exist by sftp. Return True or False. #####
-    def sftpPathIsExist(self, path):
-        try:
-            self.sftp.stat(path)
-        except:
-            #print "sftpPathIsExist: The path is not exist: %s" (path)
-            return False
-        else:
-            return True
-
-
-
 ###### Create the dir that isn't exist. #######
     def createDirNotExist(self, dir):
         if not os.path.exists(dir):
             print "\tInfo: Create the dir: %s.." % (dir)
             os.makedirs(dir)
-
-###### Create the dir that isn't exist by sftp. #######
-    def sftpCreateDirNotExist(self, dir):
-        #print "sftpCreateDirNotExist():"
-        if not  self.sftpPathIsExist(dir):
-            print "\tInfo: Create the dir: %s.." % (dir)
-            self.sftp.mkdir(dir)
-
 
 ###### Converting the path to a new path(dir2 + path[path.index((dir1'sBasename)):]) according to dir1's basename and dir2.#####
 ###### 4Example, path2nPath('/opt/zenpacks', '/tmp', '/opt/zenpacks/dir1'), so the result is '/tmp/zenpacks/dir1'. ############
@@ -207,90 +189,6 @@ class syncSftp:
             print "\tError: It must be sets : %s,%s" % (A, B)
             sys.exit(1)
 
-########## Checking the file's type by sftp ####
-    def sftpPathIsdir(self, path):
-        fstat = self.sftp.stat(path)
-        fType = str(fstat)[0]
-        if fType == "d":
-            return True
-        else:
-            return False
-
-    def sftpPathIsfile(self, path):
-        fstat = self.sftp.stat(path)
-        fType = str(fstat)[0]
-        if fType == "-":
-            return True
-        else:
-            return False
-
-    def sftpPathIslink(self, path):
-        fstat = self.sftp.stat(path)
-        fType = str(fstat)[0]
-        if fType == "l":
-            return True
-        else:
-            return False
-
-########## Checking if a directory is empty by sftp. ######
-    def sftpPathIsEmptyDir(self, path):
-        if self.sftp.listdir(path) == []:
-            return True
-        else:
-            return False
-
-######## Deleting an entire directory tree.####
-######## Notice this is a recursive function ####
-    def sftpRmtree(self, path):
-        fs = self.sftp.listdir(path)
-        print "fs: %s" % (fs)
-        for f in fs:
-            absfs = path + '/' + f
-            #print "absfs: %s" % (absfs)
-            if self.sftpPathIsdir(absfs):
-                if self.sftpPathIsEmptyDir(absfs):
-                    print "\tInfo: Deleting the dir: %s.." % (absfs) 
-                    self.sftp.rmdir(absfs)
-                else:
-                    print "absfs: %s" % (absfs)
-                    self.sftpRmtree(absfs)
-            elif self.sftpPathIsfile(absfs):
-                print "\tInfo: Deleting the file: %s.." % (absfs) 
-                self.sftp.remove(absfs)
-            elif self.sftpPathIslink(absfs):
-                print "\tInfo: Deleting the link: %s.." % (absfs) 
-                self.sftp.unlink(absfs)
-            else:
-                print "\tWarning: Unknow file type: %s" % (absfs)
-        ######
-        print "\tInfo: Deleting the dir: %s.." % (path) 
-        self.sftp.rmdir(path)
-
-##### Get all the remote files list from remote dir. The list contain some attributes.#####
-###### Notice, the function is recursive function. #####
-    def sftpGetFtree(self, dir):
-        #####
-        sftp = self.sftp
-        def sftpGetFtree1(sftp, dir):
-            ftree = []
-            #dir = os.path.normpath(dir)
-            fs = sftp.listdir(dir)
-            for f in fs:
-                #fPath = os.path.join(dir, f)
-                fPath = dir + '/' + f
-                fstat = sftp.stat(fPath)
-                fType = str(fstat)[0]
-                fMtime = fstat.st_mtime
-                if fType == "d":
-                    ftree.append(('d', fMtime, fPath))
-                    ftree += sftpGetFtree1(sftp, fPath) 
-                else:
-                    ftree.append(('f', fMtime, fPath))
-            return ftree
-        ##### Plus the attribute of parent dir to the result list##############
-        ftree = [('d', sftp.stat(dir).st_mtime, dir)] + sftpGetFtree1(sftp, dir)
-        return ftree
-
 ####### Get all the local file list from local dir. The list contains some attributes. ############
 ###### Notice, the function is recursive function. #####
     def getFtree(self, dir):
@@ -313,24 +211,6 @@ class syncSftp:
         ftree = [('d', os.stat(dir).st_mtime, dir)] + getFtree1(dir) 
         return ftree
 
-#####Not working## List the remote dir, but the results is absolute path.#####
-    def sftpLdirAbs(self, dir):
-        absfs = []
-        fs =  self.sftp.listdir(dir)
-        for f in fs:
-            fPath = dir + '/' + f
-            absfs.append(fPath)
-        return absfs
-
-######Not working## # List the local dir's file list, but the results is absolute path.#####
-    def ldirAbs(self, dir):
-        absfs = []
-        fs = os.listdir(dir)
-        for f in fs:
-            fPath = os.path.join(dir, f)
-            absfs.append(fPath)
-        return absfs
-
 
 ################################# Utilities Ends #########################################
 
@@ -338,7 +218,7 @@ class syncSftp:
 
 ##### Getting the _rFList's value ######
     def getRFList(self, dir):
-        self._rFList = self.sftpGetFtree(dir)
+        self._rFList = self.sftpUtils1.getfstree(dir)
 
 ##### Getting the _lFList's value #####
     def getLFList(self, dir):
@@ -395,7 +275,7 @@ class syncSftp:
         if isinstance(dList, list):
             for dir in dList:
                 rd = self.path2nPath(self.desDir, os.path.split(self.desDir)[0], dir)
-                self.sftpCreateDirNotExist(rd)
+                self.sftpPath1.mkdirIfNotExists(rd)
         else:
             print "\tError: This is not a list: %s" % (dList)
 
@@ -412,6 +292,9 @@ class syncSftp:
             sys.exit(1)
         print 'Info: Successful: ssh connection'
         self.sftp = paramiko.SFTPClient.from_transport(ssht)
+        # Bounding the method
+        self.sftpPath1 = sftpPath(self.sftp)
+        self.sftpUtils1 = sftpUtils(self.sftp)
 
 ###### get the last modified time #######
     def getLastCheckTime(self):
@@ -505,22 +388,16 @@ class syncSftp:
                 for path in result:
                     #tpath = os.path.join(dir, path)
                     path = ndir + '/' + path
-                    if self.sftpPathIsfile(path):
+                    if self.sftpPath1.isfile(path):
                         print "\tInfo: Deleting the file: %s.." % (path) 
                         self.sftp.remove(path)
-                    elif self.sftpPathIsdir(path):
-                        self.sftpRmtree(path)
+                    elif self.sftpPath1.isdir(path):
+                        self.sftpUtils1.rmtree(path)
                     else:
                         print "\tWarning: Unknow file type: %s" % (path)
                         continue
             else:
                 print "\tInfo: ll(%s) is not a Proper subset of rl(%s)" % (ll, rl)
-
-
-
-
-
-
 
 
 
@@ -537,8 +414,6 @@ if __name__ == "__main__":
     #getCurTime()
     x = syncSftp('172.16.200.153', 'tcc', 'tcc', 22, '/opt/zenpacks', '/tmp')
     x.sshConn()
-    #print x.sftpPathIsExist('/opt/zenpacks/dir1/dir789')
-    #x.sftpCreateDirNotExist('/opt/zenpacks/dir1/dir789')
     x.getRFList('/opt/zenpacks')
     x.getLFList('/tmp/zenpacks')
     #print "%s %s\n\n\n" % (x._rFList, len(x._rFList))
