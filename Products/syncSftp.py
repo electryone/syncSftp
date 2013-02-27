@@ -3,19 +3,21 @@
 #
 ############################################################
 
-
 import paramiko
 import os, sys
 import time, shutil
-from sftp.sftpPath import sftpPath
-from sftp.sftpUtils import sftpUtils
-from Utils import Utils
+
+##Import my modules
+from Products.sftp.sftpPath import sftpPath
+from Products.sftp.sftpUtils import sftpUtils
+from Products.Utils import Utils
 
 
 class syncSftp:
     """
     Headquarters of this program.
     """
+
 ########## Variables #########
     ### the deeply remote file list. The file's path is absolute path. ####
     _rFList = []
@@ -38,8 +40,32 @@ class syncSftp:
     ##### The Last check time. In the other words, it's the time run this program last time.###
     _lastCheckTime = 0
 
+    #### The root dir of syncSftp is living.
+    _rootDir = os.path.dirname(os.getcwd()) 
+
+    #### The Products dir of syncSftp is living.
+    _proDir = os.path.join(_rootDir, 'Products') 
+
+    #### The Logs dir of syncSftp is living.
+    _logDir = os.path.join(_rootDir, 'Logs') 
+
+    #### The Engine dir of syncSftp is living.
+    _engDir = os.path.join(_rootDir, 'Engine') 
+
+    #### The Setting dir of syncSftp is living.
+    _setDir = os.path.join(_rootDir, 'Setting')
+
+    #### The time control file
+    timeContr = os.path.join(_setDir, 'currentTime')
+
+    #### The log file of ssh connection.
+    paramikoLog = os.path.join(_logDir, 'paramiko.log')
+    
+
+#############################################################################
 #### Bounding some methods from function module.
     utilities = Utils()
+
 
 #######################################################
     def __init__(self, hostname, username, password, port, desDir, localDir):
@@ -58,7 +84,8 @@ class syncSftp:
         """
         get current time & store it
         """
-        f = open('currentTime', 'w')
+        
+        f = open(self.timeContr, 'w')
         f.write(str(time.time()))
         f.close()
 
@@ -66,8 +93,8 @@ class syncSftp:
         """
         get the last modified time.
         """
-        if os.path.isfile('currentTime'):
-            f = open('currentTime', 'r')
+        if os.path.isfile(self.timeContr):
+            f = open(self.timeContr, 'r')
             self._lastCheckTime = float(f.read())
             f.close()
             if self._lastCheckTime == 0:
@@ -228,7 +255,7 @@ class syncSftp:
         """
         Connecting to remote host by ssh.
         """
-        paramiko.util.log_to_file('paramiko.log')
+        paramiko.util.log_to_file(self.paramikoLog)
         ssht = paramiko.Transport((self.hostname, self.port))
         self.ssht = ssht
         try:
@@ -251,3 +278,6 @@ class syncSftp:
 
 
 
+#if __name__ == "__main__":
+    #self-test code
+    #x = syncSftp()

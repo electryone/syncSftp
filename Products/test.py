@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os, sys
 import paramiko
 from sftp.sftpPath import sftpPath 
 
@@ -94,12 +95,17 @@ class test:
                         continue
         return "Done" 
 
+   #### The root dir of syncSftp is living.
+    _rootDir = os.path.dirname(os.getcwd())
+    _logDir = os.path.join(_rootDir, 'Logs')
+
 
 if __name__ == "__main__":
     #a = mysum([1, 2, 3, 4, 5])
     x = test()
-    x.sshConn()
+    #x.sshConn()
     #print sftpGetFtree('/opt/zenpacks/dir2')
     #print a, len(a)
     #print x.sftpPathIsdir('/tmp/dir2')
     #x.sftpRmtree('/tmp/dir1')
+    print x._rootDir, x._logDir
