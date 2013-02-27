@@ -8,6 +8,8 @@ __doc__ = """Utils
 General utility functions module.
 """
 
+import os, sys
+
 class Utils:
     def checkPath(self, path):
         """
@@ -64,19 +66,23 @@ class Utils:
             print "\tInfo: Create the dir: %s.." % (dir)
             os.makedirs(dir)
 
-    def mfsInfo(self, fs):
+    def mfsInfo(self, fs, tm):
         """
-        Get the modified files list since last check. Chop off the redundant attributes. 
-        Please notice the format of 'fs'.
-        It looks like [('d', 1361237415.0, '/tmp/zenpacks/dir345'), ('d', 1361237415.0, '/tmp/zenpacks/dir123')]
+        Get the new file list against the time. Chop off the redundant attributes.
+        @param fs:  the file list to be check out.
+        @param tm:  time since the epoch. 
+        @type fs:   list.  The format looks like [('d', 1361237415.0, '/tmp/zenpacks/dir345'), ('d', 1361237415.0, '/tmp/zenpacks/dir123')]
+        @type tm:   float 
+        @return:    a list is new against the time.  
+        @rtype: list
         """
         if isinstance(fs, list):
             mfs = []
             mds = []
             for f in fs:
-                if f[0] == 'f' and f[1] > self._lastCheckTime:
+                if f[0] == 'f' and f[1] > tm:
                     mfs.append(f[2])
-                elif f[0] == 'd' and f[1] > self._lastCheckTime:
+                elif f[0] == 'd' and f[1] > tm:
                     mds.append(f[2])
                 elif f[0] != 'd' and f[0] != 'f' or f[1] < 0: 
                     print "\tWarning: Unknow file format: %s" % (f)

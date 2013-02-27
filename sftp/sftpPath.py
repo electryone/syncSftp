@@ -7,6 +7,8 @@ __doc__ = """sftpPath
 This module implements some functions on pathnames.
 """
 
+import sys
+
 class sftpPath:
     def __init__(self, sftp):
         """

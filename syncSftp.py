@@ -39,7 +39,7 @@ class syncSftp:
     _lastCheckTime = 0
 
 #### Bounding some methods from function module.
-utilities = Utils()
+    utilities = Utils()
 
 #######################################################
     def __init__(self, hostname, username, password, port, desDir, localDir):
@@ -50,11 +50,11 @@ utilities = Utils()
         self.desDir = desDir
         self.localDir = localDir
         #### Some Initial action ######
-        utilities.checkPath(self.localDir)
-        utilities.checkPath(self.desDir)
+        self.utilities.checkPath(self.localDir)
+        self.utilities.checkPath(self.desDir)
         self.createIniDir()
 
-    def getCurTime():
+    def getCurTime(self):
         """
         get current time & store it
         """
@@ -87,7 +87,7 @@ utilities = Utils()
         """
         Getting the _lFList's value.
         """
-        self._lFList = utilities.getFtree(dir)
+        self._lFList = self.utilities.getFtree(dir)
 
 
 
@@ -98,7 +98,7 @@ utilities = Utils()
         dirBase = os.path.basename(self.desDir)
         #print "createInidir():dirBase: %s" % (dirBase)
         iniDir = os.path.join(self.localDir, dirBase)
-        utilities.createDirNotExists(iniDir)
+        self.utilities.createDirNotExists(iniDir)
 
     def createDirLocal(self, dList):
         """
@@ -107,8 +107,8 @@ utilities = Utils()
         """
         if isinstance(dList, list):
             for dir in dList:
-                ld = utilities.path2nPath(self.desDir, self.localDir, dir)
-                utilities.createDirNotExists(ld)
+                ld = self.utilities.path2nPath(self.desDir, self.localDir, dir)
+                self.utilities.createDirNotExists(ld)
         else:
             print "\tError: This is not a list: %s" % (dList)
             
@@ -119,7 +119,7 @@ utilities = Utils()
         """
         if isinstance(dList, list):
             for dir in dList:
-                rd = utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], dir)
+                rd = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], dir)
                 self.sftpPath1.mkdirIfNotExists(rd)
         else:
             print "\tError: This is not a list: %s" % (dList)
@@ -129,12 +129,12 @@ utilities = Utils()
         Getting the modified files from remote dir.
         """
         print "Modifying local.."
-        self._rMFList, self._rMDList = utilities.mfsInfo(self._rFList)
+        self._rMFList, self._rMDList = self.utilities.mfsInfo(self._rFList, self._lastCheckTime)
         self.createDirLocal(self._rMDList)
         #self.sftp.get('/opt/Twisted/clientFactory.py', os.path.join('/tmp', 'clientFactory.py'))
         for f in self._rMFList:
             ###### The new local path to get the modified file ######
-            lf = utilities.path2nPath(self.desDir, self.localDir, f)
+            lf = self.utilities.path2nPath(self.desDir, self.localDir, f)
             try:
                 print "\tInfo: Getting the file from remote: %s.." % (f) 
                 self.sftp.get(f, lf)
@@ -149,11 +149,11 @@ utilities = Utils()
         Putting the modified files from local dir to the remote dir.
         """
         print "Modifying remote.."
-        self._lMFList, self._lMDList = utilities.mfsInfo(self._lFList)
+        self._lMFList, self._lMDList = self.utilities.mfsInfo(self._lFList, self._lastCheckTime)
         self.createDirRemote(self._lMDList)
         for f in self._lMFList:
             ##### The new remote path to put the modified file ####
-            rf = utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], f)
+            rf = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], f)
             #print "putLMFs():rf: %s" % (rf)
             try:
                 print "\tInfo: Putting the file to remote: %s.." % (f) 
@@ -170,13 +170,13 @@ utilities = Utils()
         'rdl' is the remote directory list that has be modified.
         """
         for dir in rdl:
-            ndir = utilities.path2nPath(self.desDir, self.localDir, dir)
+            ndir = self.utilities.path2nPath(self.desDir, self.localDir, dir)
             rl = self.sftp.listdir(dir)
             ll = os.listdir(ndir)
             print "\tInfo: rl: %s ll: %s" % (rl, ll)
             rl = set(rl)
             ll = set(ll)
-            if utilities.isProperSubset(rl, ll):
+            if self.utilities.isProperSubset(rl, ll):
                 result = ll - rl
                 print "\tInfo: rmLocalFile(): result: %s" % (result)
                 for path in result:
@@ -200,13 +200,13 @@ utilities = Utils()
         'ldl' is the local directory list that has be modified.
         """
         for dir in ldl:
-            ndir = utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], dir)
+            ndir = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], dir)
             ll = os.listdir(dir)
             rl = self.sftp.listdir(ndir)
             print "\tInfo: ll: %s rl: %s" % (ll, rl)
             ll = set(ll)
             rl = set(rl)
-            if utilities.isProperSubset(ll, rl):
+            if self.utilities.isProperSubset(ll, rl):
                 result = rl - ll
                 print "\tInfo: rmLocalFile(): result: %s" % (result)
                 for path in result:
