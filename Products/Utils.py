@@ -151,5 +151,18 @@ class Utils:
         ftree = [('d', os.stat(dir).st_mtime, dir)] + getFtree1(dir) 
         return ftree
 
-
-
+    def getDeletedFiles(self, fs1, fs2):
+        """
+        Finding out the deleted files according to the files list that the last sync period.
+        Cleaning the deleted files since last sync period.
+        @param fs1: the previous file list.
+        @param fs2: the current list.
+        @return : return the relative complement of fs2 in fs1.
+        @rtype  : list
+        @type fs1:  list
+        @type fs2:  list
+        """
+        sets1 = set(fs1)
+        sets2 = set(fs2)
+        sets3 = sets1 - sets2
+        return list(sets3)

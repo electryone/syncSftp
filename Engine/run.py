@@ -29,7 +29,7 @@ def run():
     x.getRMFs()
     x.putLMFs()
     x.sshClose()
-    x.getCurTime()
+    x.saveAppdat()
     print "\nSync finished."
 
 if __name__ == "__main__":

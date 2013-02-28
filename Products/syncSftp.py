@@ -53,14 +53,17 @@ class syncSftp:
     _engDir = os.path.join(_rootDir, 'Engine') 
 
     #### The Setting dir of syncSftp is living.
-    _setDir = os.path.join(_rootDir, 'Setting')
+    _setDir = os.path.join(_rootDir, 'Settings')
 
     #### The time control file
     timeContr = os.path.join(_setDir, 'currentTime')
 
     #### The log file of ssh connection.
     paramikoLog = os.path.join(_logDir, 'paramiko.log')
-    
+   
+    #### some Setting files
+    datPrevious = os.path.join(_setDir, 'dat.Previous')
+
 
 #############################################################################
 #### Bounding some methods from function module.
@@ -80,14 +83,22 @@ class syncSftp:
         self.utilities.checkPath(self.desDir)
         self.createIniDir()
 
-    def getCurTime(self):
+    def saveAppdat(self):
         """
-        get current time & store it
+        Saving app data
+        2actions like below:
+        1) Getting current sys time & store it
+        2) Writing _lFList and _rFList's value to dataPrevious file
         """
-        
-        f = open(self.timeContr, 'w')
-        f.write(str(time.time()))
-        f.close()
+        ###
+        ft = open(self.timeContr, 'w')
+        ft.write(str(time.time()))
+        ft.close()
+        ###
+        fp = open(self.datPrevious, 'w')
+        wstr = "_lFList: %s\n_rFList: %s" % (self._lFList, self._rFList)
+        fp.write(wstr)
+
 
     def getLastCheckTime(self):
         """
@@ -220,6 +231,15 @@ class syncSftp:
             else:
                 print "\tInfo: It's not a Proper subset:  rl(%s),ll(%s)" % (rl, ll)
                 continue
+
+    def cleanLocalFile(self, fs):
+        """
+        Cleaning the deleted files since last sync period.
+        """
+        fp = open(self.datPrevious, 'r')
+        fp.close()
+        pass
+
 
     def rmRemoteFile(self, ldl):
         """
