@@ -9,6 +9,7 @@ General utility functions module.
 """
 
 import os, sys
+import pickle
 
 class Utils:
     def checkPath(self, path):
@@ -166,3 +167,41 @@ class Utils:
         sets2 = set(fs2)
         sets3 = sets1 - sets2
         return list(sets3)
+
+    def getDatPrevious(self, setFile):
+        """
+        Getting the app data that last saved from the setting file
+        Converting the format of these data to dict.
+        @param setFile: the name of the saved setting file
+        @type : string
+        @return : the all app data that last saved
+        @rtype : dict
+        """
+        datPrevious = {}
+        fp = open(setFile, 'r')
+        string = fp.read()
+        fp.close()
+        wlist = pickle.loads(string)
+        #for line in string:
+         #   splitLine = line.split(' = ') 
+          #  datPrevious[splitLine[0]] = splitLine[1] 
+        #print datPrevious.get('_rFList')
+        datPrevious = dict(wlist)
+        #print "datPrevious: %s" % datPrevious
+        return datPrevious
+        
+    def chopAttr(self, fList):
+        """
+        Chopping off the redundant attribute. Only retain the path attribute.
+        @param fs: the list to be chopped off.
+        @type fs:   list.  The format looks like [('d', 1361237415.0, '/tmp/zenpacks/dir345'), ('d', 1361237415.0, '/tmp/zenpacks/dir123')]
+        @rtype : list
+        """
+        #print "fList: %s" % (fList)
+        #print type(fList)
+        fs = []
+        for f in fList:
+            fs.append(f[2])
+        return fs
+
+

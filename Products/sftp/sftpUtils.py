@@ -4,8 +4,9 @@
 __doc__ = """syncUtils
 General utility functions module about sftp.
 """
+from sftpPath import sftpPath
 
-class sftpUtils:
+class sftpUtils(sftpPath):
     def __init__(self, sftp):
         """
         The parameter "sftp" is the name of transport of SFTPClient.
@@ -26,17 +27,17 @@ class sftpUtils:
         for f in fs:
             absfs = path + '/' + f
             #print "absfs: %s" % (absfs)
-            if self.sftpPath1.isdir(absfs):
-                if self.sftpPath1.isEmptyDir(absfs):
+            if self.isdir(absfs):
+                if self.isEmptyDir(absfs):
                     print "\tInfo: Deleting the dir: %s.." % (absfs) 
                     self.sftp.rmdir(absfs)
                 else:
                     print "absfs: %s" % (absfs)
                     self.rmtree(absfs)
-            elif self.sftpPath1.isfile(absfs):
+            elif self.isfile(absfs):
                 print "\tInfo: Deleting the file: %s.." % (absfs) 
                 self.sftp.remove(absfs)
-            elif self.sftpPath1.islink(absfs):
+            elif self.islink(absfs):
                 print "\tInfo: Deleting the link: %s.." % (absfs) 
                 self.sftp.unlink(absfs)
             else:

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+
 import os, sys
+import pickle
 import paramiko
 from sftp.sftpPath import sftpPath 
 
@@ -99,13 +101,39 @@ class test:
     _rootDir = os.path.dirname(os.getcwd())
     _logDir = os.path.join(_rootDir, 'Logs')
 
+    def writeFile(self):
+        #ws = "('This', 'is')\n('a', 'string.')"
+        #ws = "This is a string."
+        #ws = str(wl)
+        d1 = [('a', 1), ('b', 2)]
+        ds = pickle.dumps(d1)
+        fp = open('/tmp/file1.txt', 'w')
+        fp.write(ds)
+        fp.close()
+
+    def readFile(self):
+        f = open('/tmp/file1.txt', 'r')
+        fl = f.readlines()
+        f.close()
+        print fl
+        for line in fl:
+            pass
+            #print line.strip()
+        #    dl.append(line.strip())
+        #print dl
+        #print type(dl)
+
+
+
 
 if __name__ == "__main__":
     #a = mysum([1, 2, 3, 4, 5])
     x = test()
+    x.writeFile()
+    #x.readFile()
     #x.sshConn()
     #print sftpGetFtree('/opt/zenpacks/dir2')
     #print a, len(a)
     #print x.sftpPathIsdir('/tmp/dir2')
     #x.sftpRmtree('/tmp/dir1')
-    print x._rootDir, x._logDir
+    #print x._rootDir, x._logDir

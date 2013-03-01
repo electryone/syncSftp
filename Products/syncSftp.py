@@ -3,7 +3,7 @@
 #
 ############################################################
 
-import paramiko
+import paramiko, pickle
 import os, sys
 import time, shutil
 
@@ -61,8 +61,8 @@ class syncSftp:
     #### The log file of ssh connection.
     paramikoLog = os.path.join(_logDir, 'paramiko.log')
    
-    #### some Setting files
-    datPrevious = os.path.join(_setDir, 'dat.Previous')
+    #### The Previous setting file
+    datPreFile = os.path.join(_setDir, 'dat.Previous')
 
 
 #############################################################################
@@ -83,23 +83,6 @@ class syncSftp:
         self.utilities.checkPath(self.desDir)
         self.createIniDir()
 
-    def saveAppdat(self):
-        """
-        Saving app data
-        2actions like below:
-        1) Getting current sys time & store it
-        2) Writing _lFList and _rFList's value to dataPrevious file
-        """
-        ###
-        ft = open(self.timeContr, 'w')
-        ft.write(str(time.time()))
-        ft.close()
-        ###
-        fp = open(self.datPrevious, 'w')
-        wstr = "_lFList: %s\n_rFList: %s" % (self._lFList, self._rFList)
-        fp.write(wstr)
-
-
     def getLastCheckTime(self):
         """
         get the last modified time.
@@ -115,6 +98,12 @@ class syncSftp:
         else:
             print "Info: Initializing sync.."
 
+    def getSettings(self):
+        """
+        Getting the app settings
+        """
+        self.preSettings = self.utilities.getDatPrevious(self.datPreFile)
+
     def getRFList(self, dir):
         """
         Getting the _rFList's value
@@ -126,8 +115,6 @@ class syncSftp:
         Getting the _lFList's value.
         """
         self._lFList = self.utilities.getFtree(dir)
-
-
 
     def createIniDir(self):
         """
@@ -180,7 +167,8 @@ class syncSftp:
                 print "\tError: Getting the file from remote: %s: %s" % (f, e)
                 sys.exit(1)
     #####Removing some files ###############
-        self.rmLocalFile(self._rMDList)
+        #self.rmLocalFile(self._rMDList)
+        self.cleanLocalFile()
 
     def putLMFs(self):
         """
@@ -232,14 +220,6 @@ class syncSftp:
                 print "\tInfo: It's not a Proper subset:  rl(%s),ll(%s)" % (rl, ll)
                 continue
 
-    def cleanLocalFile(self, fs):
-        """
-        Cleaning the deleted files since last sync period.
-        """
-        fp = open(self.datPrevious, 'r')
-        fp.close()
-        pass
-
 
     def rmRemoteFile(self, ldl):
         """
@@ -271,6 +251,50 @@ class syncSftp:
                 print "\tInfo: ll(%s) is not a Proper subset of rl(%s)" % (ll, rl)
                 continue
 
+    def cleanLocalFile(self):
+        """
+        Cleaning the local files that be deleted since last sync period.
+        """
+        lastLFList = self.preSettings.get('_lFList')
+        print "lastLFList: %s" % (lastLFList )
+        #Chopping off some attributes
+        lastFsChopped = self.utilities.chopAttr(lastLFList)
+        curFsChopped = self.utilities.chopAttr(self._lFList)
+        print "lastFsChopped: %s\ncurFsChopped: %s" % (lastFsChopped, curFsChopped)
+        #Getting the deleted file list 
+        deletedFList = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
+        print "deletedFList: %s" % (deletedFList)
+        for path in deletedFList:
+            if os.path.isfile(path):
+                print "\tInfo: Deleting the file: %s.." % (path) 
+                os.remove(path)
+            elif os.path.isdir(path):
+                print "\tInfo: Deleting the dir: %s.." % (path) 
+                shutil.rmtree(path)
+            else:
+                print "\tWarning: Unknow file type: %s" % (path)
+                continue
+
+    def cleanRemoteFile(self):
+        """
+        Cleaning the remote deleted files since last sync period.
+        """
+        lastRFList = self.preSettings.get('_rFList')
+        #Chopping off some attributes
+        lastFsChopped = self.utilities.chopAttr(lastRFList)
+        curFsChopped = self.utilities.chopAttr(self._rFList)
+        #Getting the deleted file list 
+        deletedFList = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
+        for path in deletedFList:
+            if self.sftpPath1.isfile(path):
+                print "\tInfo: Deleting the file: %s.." % (path) 
+                self.sftp.remove(path)
+            elif self.sftpPath1.isdir(path):
+                self.sftpUtils1.rmtree(path)
+            else:
+                print "\tWarning: Unknow file type: %s" % (path)
+                continue
+
     def sshConn(self):
         """
         Connecting to remote host by ssh.
@@ -295,6 +319,24 @@ class syncSftp:
         close ssh connection.
         """ 
         self.ssht.close()
+
+    def saveAppdat(self):
+        """
+        Saving app data
+        2actions like below:
+        1) Getting current sys time & store it
+        2) Writing _lFList and _rFList's value to dataPrevious file
+        """
+        ###
+        ft = open(self.timeContr, 'w')
+        ft.write(str(time.time()))
+        ft.close()
+        ###
+        fp = open(self.datPreFile, 'w')
+        #wstr = "_lFList = %s\n_rFList = %s" % (self._lFList, self._rFList)
+        wlist = [('_lFList', self._lFList), ('_rFList', self._rFList )]
+        wstr = pickle.dumps(wlist)
+        fp.writelines(wstr)
 
 
 
