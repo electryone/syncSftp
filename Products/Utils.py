@@ -67,52 +67,50 @@ class Utils:
             print "\tInfo: Create the dir: %s.." % (dir)
             os.makedirs(dir)
 
-    def mfsInfo(self, fs, tm):
+    def mfsInfo(self, fList, tm):
         """
         Get the new file list against the time. Chop off the redundant attributes.
-        @param fs:  the file list to be check out.
+        @param fList:  the file list to be check out.
         @param tm:  time since the epoch. 
-        @type fs:   list.  The format looks like [('d', 1361237415.0, '/tmp/zenpacks/dir345'), ('d', 1361237415.0, '/tmp/zenpacks/dir123')]
+        @type fList:   list.  The format looks like [('d', 1361237415.0, '/tmp/zenpacks/dir345'), ('d', 1361237415.0, '/tmp/zenpacks/dir123')]
         @type tm:   float 
         @return:    a list is new against the time.  
         @rtype: list
         """
-        if isinstance(fs, list):
-            mfs = []
-            mds = []
-            for f in fs:
-                if f[0] == 'f' and f[1] > tm:
-                    mfs.append(f[2])
-                elif f[0] == 'd' and f[1] > tm:
-                    mds.append(f[2])
-                elif f[0] != 'd' and f[0] != 'f' or f[1] < 0: 
-                    print "\tWarning: Unknow file format: %s" % (f)
-                    continue
+        ###Checking if it's list.
+        self.testIsinstance(fList, list)
+        ###Checking if it's float.
+        self.testIsinstance(tm, float)
+        ######
+        mfs = []
+        mds = []
+        for f in fList:
+            if f[0] == 'f' and f[1] > tm:
+                mfs.append(f[2])
+            elif f[0] == 'd' and f[1] > tm:
+                mds.append(f[2])
+            elif f[0] != 'd' and f[0] != 'f' or f[1] < 0: 
+                print "\tWarning: Unknow file format: %s" % (f)
+                continue
+        print "\tInfo: The number of file to be modified are: file: %s dir: %s" % (len(mfs), len(mds))
+        return (mfs, mds)
 
-            print "\tInfo: The number of file to be modified are: file: %s dir: %s" % (len(mfs), len(mds))
-            return (mfs, mds)
-        else:
-            print "\tError: It must be a list: %s" % (fs)
-            sys.exit(1)
-
-    def dirList(self, fs):
+    def dirList(self, fList):
         """
-        Get all the dir list from a parent dir.Please notice the format of fs list. 
+        Get all the dir list from a parent dir.Please notice the format of fList list. 
         It looks like [('d', 1361237415.0, '/tmp/zenpacks/dir345'), ('d', 1361237415.0, '/tmp/zenpacks/dir123')].
         """
         ###Checking if it's list.
-        if isinstance(fs, list):
-            ds = []
-            for f in fs:
-                if f[0] == "d":
-                    ds.append(f)
-                elif f[0] != 'd' and f[0] != 'f' or f[1] < 0: 
-                    print "\tWarning: Unknow file format: %s" % (f)
-                    continue
-            return ds
-        else:
-            print "\tError: It must be a list: %s" % (fs)
-            sys.exit(1)
+        self.testIsinstance(fList, list)
+        ####
+        ds = []
+        for f in fList:
+            if f[0] == "d":
+                ds.append(f)
+            elif f[0] != 'd' and f[0] != 'f' or f[1] < 0: 
+                print "\tWarning: Unknow file format: %s" % (f)
+                continue
+        return ds
 
     def isProperSubset(self, A, B):
         """
@@ -120,14 +118,13 @@ class Utils:
         but not equal to,B, then return True.
         """
         ####Checking if it's sets.
-        if isinstance(A, set) and isinstance(B, set):
-            if A.issubset(B) and A != B:
-                return True
-            else:
-                return False
+        self.testIsinstance(A, set)
+        self.testIsinstance(B, set)
+        #####
+        if A.issubset(B) and A != B:
+            return True
         else:
-            print "\tError: It must be sets : %s,%s" % (A, B)
-            sys.exit(1)
+            return False
 
     def getFtree(self, dir):
         """
@@ -167,6 +164,10 @@ class Utils:
         @type fs1:  list
         @type fs2:  list
         """
+        ###Checking if it's list.
+        self.testIsinstance(fs1, list)
+        self.testIsinstance(fs2, list)
+        ####
         sets1 = set(fs1)
         sets2 = set(fs2)
         sets3 = sets1 - sets2
@@ -201,6 +202,9 @@ class Utils:
         @type fs:   list.  The format looks like [('d', 1361237415.0, '/tmp/zenpacks/dir345'), ('d', 1361237415.0, '/tmp/zenpacks/dir123')]
         @rtype : list
         """
+        ###Checking if it's list.
+        self.testIsinstance(fList, list)
+        ####
         #print "fList: %s" % (fList)
         #print type(fList)
         fs = []
@@ -208,4 +212,18 @@ class Utils:
             fs.append(f[2])
         return fs
 
+    def testIsinstance(self, Instance, Type):
+        """
+        Checking the type of instance.
+        @param Instance: the instance to be checked.
+        @param Type: the type of instance to be checked
+        @return : If the type of instance is right, do nothing. But if not,
+        return some Error and quite the program.
+        """
+        ###Checking if it's list.
+        if isinstance(Instance, Type):
+            pass
+        else:
+            print "\tError: It must be a %s: %s" % (Type, Instance)
+            sys.exit(1)
 

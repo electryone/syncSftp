@@ -20,12 +20,28 @@ class test:
         #print sftpPath.exists('/tmp/dir')
         print sftpPath(self.sftp).exists('/tmp/dir1')
 
-    def testList():
+    def testList(self):
         l = ['a', 'b']
-        if not l:
-            print "Null"
+        d = {'a': 1, 'b': 2}
+        
+        self.testIsinstance(l, dict)
+        print "It's list: %s" % (l)
+
+    def testIsinstance(self, Instance, Type):
+        """
+        Checking the type of instance.
+        @param Instance: the instance to be checked.
+        @param Type: the type of instance to be checked
+        @return : If the type of instance is right, do nothing. But if not,
+        return some Error and quite the program.
+        """
+        ###Checking if it's list.
+        if isinstance(Instance, Type):
+            pass
         else:
-            print "nonNull"
+            print "\tError: It must be a %s: %s" % (Type, Instance)
+            sys.exit(1)
+
 
     def mysum(L):
         print(L)
@@ -129,7 +145,8 @@ class test:
 if __name__ == "__main__":
     #a = mysum([1, 2, 3, 4, 5])
     x = test()
-    x.writeFile()
+    x.testList()
+    #x.writeFile()
     #x.readFile()
     #x.sshConn()
     #print sftpGetFtree('/opt/zenpacks/dir2')

@@ -53,7 +53,7 @@ class sftpPath:
         Create the dir that isn't exist by sftp.
         """
         if not  self.exists(dir):
-            #print "\tInfo: Create the dir: %s.." % (dir)
+            print "\tInfo: Create the dir: %s.." % (dir)
             self.sftp.mkdir(dir)
 
     # Some below functions are used to check the file's type by sftp.
