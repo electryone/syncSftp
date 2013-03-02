@@ -188,7 +188,8 @@ class syncSftp:
                 print "\tError: Putting the file to remote: %s: %s" % (f, e)
                 sys.exit(1)
     #####Removing some files ###############
-        self.rmRemoteFile(self._lMDList)
+        #self.rmRemoteFile(self._lMDList)
+        self.cleanRemoteFile()
 
     def rmLocalFile(self, rdl):
         """
@@ -220,6 +221,62 @@ class syncSftp:
                 print "\tInfo: It's not a Proper subset:  rl(%s),ll(%s)" % (rl, ll)
                 continue
 
+    def cleanLocalFile(self):
+        """
+        Cleaning the local files that be deleted since last sync period.
+        """
+        lastRFList = self.preSettings.get('_rFList')
+        ###Chopping off some attributes
+        lastFsChopped = self.utilities.chopAttr(lastRFList)
+        curFsChopped = self.utilities.chopAttr(self._rFList)
+        print "\tInfo: The previous file list in remote: %s" % (lastFsChopped)
+        print "\tInfo: The current file list in remote: %s" % (curFsChopped)
+        #print "lastFsChopped: %s\ncurFsChopped: %s" % (lastFsChopped, curFsChopped)
+        ####Getting the deleted file list 
+        deletedFListOrgin = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
+        deletedFList = sorted(deletedFListOrgin, reverse=True)
+        print "\tInfo: The deleted file list in remote: %s" % (deletedFList)
+        for path in deletedFList:
+            lPath = self.utilities.path2nPath(self.desDir, self.localDir, path)
+            print "\tInfo: The file to be synced in local: %s" % (lPath)
+            if os.path.isfile(lPath):
+                print "\tInfo: Deleting the file: %s.." % (lPath) 
+                os.remove(lPath)
+            elif os.path.isdir(lPath):
+                print "\tInfo: Deleting the dir: %s.." % (lPath) 
+                shutil.rmtree(lPath)
+            else:
+                print "\tWarning: Unknow file type: %s" % (lPath)
+                continue
+
+    def cleanRemoteFile(self):
+        """
+        Cleaning the remote files that be deleted since last sync period.
+        """
+        lastLFList = self.preSettings.get('_lFList')
+        ###Chopping off some attributes
+        lastFsChopped = self.utilities.chopAttr(lastLFList)
+        curFsChopped = self.utilities.chopAttr(self._lFList)
+        print "\tInfo: The previous file list in local: %s" % (lastFsChopped)
+        print "\tInfo: The current file list in local: %s" % (curFsChopped)
+        #print "lastFsChopped: %s\ncurFsChopped: %s" % (lastFsChopped, curFsChopped)
+        ####Getting the deleted file list 
+        deletedFListOrgin = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
+        deletedFList = sorted(deletedFListOrgin, reverse=True)
+        print "\tInfo: The deleted file list in local: %s" % (deletedFList)
+        for path in deletedFList:
+            rPath = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], path)
+            print "\tInfo: The file to be synced in remote: %s" % (rPath)
+            if self.sftpPath1.isfile(rPath):
+                print "\tInfo: Deleting the file: %s.." % (rPath) 
+                self.sftp.remove(rPath)
+            elif self.sftpPath1.isdir(rPath):
+                print "\tInfo: Deleting the dir: %s.." % (rPath) 
+                self.sftpUtils1.rmtree(rPath)
+            else:
+                print "\tWarning: Unknow file type: %s" % (rPath)
+                continue
+
 
     def rmRemoteFile(self, ldl):
         """
@@ -249,50 +306,6 @@ class syncSftp:
                         continue
             else:
                 print "\tInfo: ll(%s) is not a Proper subset of rl(%s)" % (ll, rl)
-                continue
-
-    def cleanLocalFile(self):
-        """
-        Cleaning the local files that be deleted since last sync period.
-        """
-        lastLFList = self.preSettings.get('_lFList')
-        print "lastLFList: %s" % (lastLFList )
-        #Chopping off some attributes
-        lastFsChopped = self.utilities.chopAttr(lastLFList)
-        curFsChopped = self.utilities.chopAttr(self._lFList)
-        print "lastFsChopped: %s\ncurFsChopped: %s" % (lastFsChopped, curFsChopped)
-        #Getting the deleted file list 
-        deletedFList = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
-        print "deletedFList: %s" % (deletedFList)
-        for path in deletedFList:
-            if os.path.isfile(path):
-                print "\tInfo: Deleting the file: %s.." % (path) 
-                os.remove(path)
-            elif os.path.isdir(path):
-                print "\tInfo: Deleting the dir: %s.." % (path) 
-                shutil.rmtree(path)
-            else:
-                print "\tWarning: Unknow file type: %s" % (path)
-                continue
-
-    def cleanRemoteFile(self):
-        """
-        Cleaning the remote deleted files since last sync period.
-        """
-        lastRFList = self.preSettings.get('_rFList')
-        #Chopping off some attributes
-        lastFsChopped = self.utilities.chopAttr(lastRFList)
-        curFsChopped = self.utilities.chopAttr(self._rFList)
-        #Getting the deleted file list 
-        deletedFList = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
-        for path in deletedFList:
-            if self.sftpPath1.isfile(path):
-                print "\tInfo: Deleting the file: %s.." % (path) 
-                self.sftp.remove(path)
-            elif self.sftpPath1.isdir(path):
-                self.sftpUtils1.rmtree(path)
-            else:
-                print "\tWarning: Unknow file type: %s" % (path)
                 continue
 
     def sshConn(self):

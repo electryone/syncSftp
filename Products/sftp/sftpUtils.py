@@ -23,27 +23,27 @@ class sftpUtils(sftpPath):
         Notice this is a recursive function.
         """
         fs = self.sftp.listdir(path)
-        print "fs: %s" % (fs)
+        #print "fs: %s" % (fs)
         for f in fs:
             absfs = path + '/' + f
             #print "absfs: %s" % (absfs)
             if self.isdir(absfs):
                 if self.isEmptyDir(absfs):
-                    print "\tInfo: Deleting the dir: %s.." % (absfs) 
+                    #print "\tInfo: Deleting the dir: %s.." % (absfs) 
                     self.sftp.rmdir(absfs)
                 else:
-                    print "absfs: %s" % (absfs)
+                    #print "absfs: %s" % (absfs)
                     self.rmtree(absfs)
             elif self.isfile(absfs):
-                print "\tInfo: Deleting the file: %s.." % (absfs) 
+                #print "\tInfo: Deleting the file: %s.." % (absfs) 
                 self.sftp.remove(absfs)
             elif self.islink(absfs):
-                print "\tInfo: Deleting the link: %s.." % (absfs) 
+                #print "\tInfo: Deleting the link: %s.." % (absfs) 
                 self.sftp.unlink(absfs)
             else:
                 print "\tWarning: Unknow file type: %s" % (absfs)
         ######
-        print "\tInfo: Deleting the dir: %s.." % (path) 
+        #print "\tInfo: Deleting the dir: %s.." % (path) 
         self.sftp.rmdir(path)
 
     def getfstree(self, dir):
