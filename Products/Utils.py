@@ -133,6 +133,10 @@ class Utils:
         """
         Get all the local file list from local dir. The list contains some attributes. 
         Notice, the function is recursive function.
+        @param dir: the path of dir
+        @type : str
+        @return : all the local file list in the dir. The list contains some attributes.
+        @rtype: list
         """
         def getFtree1(dir):
             fs = os.listdir(dir)
@@ -181,11 +185,11 @@ class Utils:
         fp = open(setFile, 'r')
         string = fp.read()
         fp.close()
-        wlist = pickle.loads(string)
-        #for line in string:
-         #   splitLine = line.split(' = ') 
-          #  datPrevious[splitLine[0]] = splitLine[1] 
-        #print datPrevious.get('_rFList')
+        try:
+            wlist = pickle.loads(string)
+        except EOFError:
+            print "Error: EOF Error: %s" % (setFile)
+            sys.exit(1)
         datPrevious = dict(wlist)
         #print "datPrevious: %s" % datPrevious
         return datPrevious

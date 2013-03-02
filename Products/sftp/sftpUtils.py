@@ -50,6 +50,10 @@ class sftpUtils(sftpPath):
         """
         Get all the remote files list from remote dir. The list contain some attributes.
         Notice, the function is recursive function.
+        @param dir: the path of dir
+        @type : str
+        @return : all the remote file list in the dir. The list contains some attributes.
+        @rtype: list
         """ 
         sftp = self.sftp
         def getfstree1(sftp, dir):

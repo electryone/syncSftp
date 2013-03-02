@@ -104,17 +104,27 @@ class syncSftp:
         """
         self.preSettings = self.utilities.getDatPrevious(self.datPreFile)
 
-    def getRFList(self, dir):
-        """
-        Getting the _rFList's value
-        """
-        self._rFList = self.sftpUtils1.getfstree(dir)
-
-    def getLFList(self, dir):
+    def getLFList(self):
         """
         Getting the _lFList's value.
         """
-        self._lFList = self.utilities.getFtree(dir)
+        dir = os.path.join(self.localDir, os.path.basename(self.desDir))
+        list = self.utilities.getFtree(dir)
+        return list
+
+    def getRFList(self):
+        """
+        Getting the _rFList's value
+        """
+        list = self.sftpUtils1.getfstree(self.desDir)
+        return list
+
+    def getFList(self):
+        """
+        Getting the _lFList and _rFList's value.
+        """
+        self._lFList = self.getLFList()
+        self._rFList = self.getRFList()
 
     def createIniDir(self):
         """
@@ -327,12 +337,6 @@ class syncSftp:
         self.sftpPath1 = sftpPath(self.sftp)
         self.sftpUtils1 = sftpUtils(self.sftp)
 
-    def sshClose(self):
-        """
-        close ssh connection.
-        """ 
-        self.ssht.close()
-
     def saveAppdat(self):
         """
         Saving app data
@@ -344,12 +348,20 @@ class syncSftp:
         ft = open(self.timeContr, 'w')
         ft.write(str(time.time()))
         ft.close()
-        ###
+        ####################################
         fp = open(self.datPreFile, 'w')
         #wstr = "_lFList = %s\n_rFList = %s" % (self._lFList, self._rFList)
-        wlist = [('_lFList', self._lFList), ('_rFList', self._rFList )]
+        lList = self.getLFList()
+        rList = self.getRFList()
+        wlist = [('_lFList', lList), ('_rFList', rList)]
         wstr = pickle.dumps(wlist)
         fp.writelines(wstr)
+
+    def sshClose(self):
+        """
+        close ssh connection.
+        """ 
+        self.ssht.close()
 
 
 
