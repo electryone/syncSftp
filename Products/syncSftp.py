@@ -92,17 +92,24 @@ class syncSftp:
             self._lastCheckTime = float(f.read())
             f.close()
             if self._lastCheckTime == 0:
+                self.initial = True
                 print "Info: Initializing sync.."
             else:
+                self.initial = False 
                 print "Last check Time: %s" % (time.strftime("%Y-%m-%d,%H:%M:%S",time.localtime(self._lastCheckTime)))
         else:
+            self.initial = True
             print "Info: Initializing sync.."
 
     def getSettings(self):
         """
         Getting the app settings
         """
-        self.preSettings = self.utilities.getDatPrevious(self.datPreFile)
+        ###If it's the initial process, it won't get the setting data of the previous.
+        if self.initial:
+            pass
+        else:
+            self.preSettings = self.utilities.getDatPrevious(self.datPreFile)
 
     def getLFList(self):
         """
@@ -177,8 +184,11 @@ class syncSftp:
                 print "\tError: Getting the file from remote: %s: %s" % (f, e)
                 sys.exit(1)
     #####Removing some files ###############
-        #self.rmLocalFile(self._rMDList)
-        self.cleanLocalFile()
+        ###If it's the initial process, it won't have the cleaned actions
+        if self.initial:
+            pass
+        else:
+            self.cleanLocalFile()
 
     def putLMFs(self):
         """
@@ -198,8 +208,11 @@ class syncSftp:
                 print "\tError: Putting the file to remote: %s: %s" % (f, e)
                 sys.exit(1)
     #####Removing some files ###############
-        #self.rmRemoteFile(self._lMDList)
-        self.cleanRemoteFile()
+        ###If it's the initial process, it won't have the cleaned actions
+        if self.initial:
+            pass
+        else:
+            self.cleanRemoteFile()
 
     def rmLocalFile(self, rdl):
         """
