@@ -3,8 +3,8 @@ syncSftp
 
 About
 ========
-Sync any files among windows, Linux, Mac.
-Please using which version the script based on the os.
+Sync any files among Windows, Linux, Mac.
+Please using the version that the script based on the os.
 
 Copyright (c) 2013 Jackie
 
