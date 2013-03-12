@@ -38,7 +38,7 @@ class syncSftp:
     _lMDList = []
 
     ##### The Last check time. In the other words, it's the time run this program last time.###
-    _lastCheckTime = 0
+    _lastCheckTime = 0.0
 
     #### The root dir of syncSftp is living.
     _rootDir = os.path.dirname(os.getcwd()) 

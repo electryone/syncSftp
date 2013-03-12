@@ -10,6 +10,7 @@ General utility functions module.
 
 import os, sys
 import pickle
+import platform
 
 class Utils:
     def checkPath(self, path):
@@ -26,8 +27,16 @@ class Utils:
         """
         Convert path to list.
         """
+        platsystem = platform.system()
         #path = os.path.normpath(path)
-        plist = path.split('/')[1:]
+        if platsystem == "Linux" or platsystem == "Mac":
+            plist = path.split('/')[1:]
+        elif platsystem == "Windows":
+            plist = path.split('\\')[1:]
+        else:
+            print "\tError: Unknow platform system: %s" % (platsystem)
+            sys.exit(1)
+
         return plist
 
     def list2path(self, list):
