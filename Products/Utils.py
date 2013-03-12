@@ -59,7 +59,7 @@ class Utils:
             print "\tError: Not absolute path: %s,%s,%s" % (dir1, dir2, path)
             sys.exit(1)
 
-    def createDirNotExists(self, dir):
+    def mkdirIfNotExists(self, dir):
         """
         Create the dir that isn't exist.
         """

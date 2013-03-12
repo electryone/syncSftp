@@ -140,7 +140,7 @@ class syncSftp:
         dirBase = os.path.basename(self.desDir)
         #print "createInidir():dirBase: %s" % (dirBase)
         iniDir = os.path.join(self.localDir, dirBase)
-        self.utilities.createDirNotExists(iniDir)
+        self.utilities.mkdirIfNotExists(iniDir)
 
     def createDirLocal(self, dList):
         """
@@ -150,7 +150,7 @@ class syncSftp:
         if isinstance(dList, list):
             for dir in dList:
                 ld = self.utilities.path2nPath(self.desDir, self.localDir, dir)
-                self.utilities.createDirNotExists(ld)
+                self.utilities.mkdirIfNotExists(ld)
         else:
             print "\tError: This is not a list: %s" % (dList)
             
