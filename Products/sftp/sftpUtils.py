@@ -76,4 +76,38 @@ class sftpUtils(sftpPath):
         ftree = [('d', sftp.stat(dir).st_mtime, dir)] + getfstree1(sftp, dir)
         return ftree
 
+    def deleteRemoteFile(self, dlist):
+        """
+        Deleting the remote files that be deleted since last sync period.
+        """
+        for path in dlist:
+            print "\tInfo: The file to be synced in remote: %s" % (path)
+            if self.isfile(path):
+                print "\tInfo: Deleting the file: %s.." % (path) 
+                self.sftp.remove(path)
+            elif self.isdir(path):
+                print "\tInfo: Deleting the dir: %s.." % (path) 
+                self.rmtree(path)
+            else:
+                print "\tWarning: Unknow file type: %s" % (path)
+                continue
+
+    def getFile(self, rf, lf)
+        """
+        Getting some files by sftp
+        """
+        try:
+            print "\tInfo: Getting the file from remote: %s.." % (rf) 
+            self.sftp.get(rf, lf)
+        except IOError, e:
+            print "\tError: Getting the file from remote: %s: %s" % (rf, e)
+            sys.exit(1)
+
+    def putFile(self, lf, rf)
+        try:
+            print "\tInfo: Putting the file to remote: %s.." % (lf) 
+            self.sftp.put(lf, rf)
+        except IOError, e:
+            print "\tError: Putting the file to remote: %s: %s" % (lf, e)
+            sys.exit(1)
 

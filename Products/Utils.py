@@ -10,7 +10,7 @@ General utility functions module.
 
 import os, sys
 import pickle
-import re
+import re, shutil
 
 class Utils:
     def checkPath(self, path):
@@ -183,6 +183,26 @@ class Utils:
         sets3 = sets1 - sets2
         return list(sets3)
 
+    def getAddedFiles(self, fs1, fs2):
+        """
+        Finding out the added files according to the files list that the last sync period.
+        Adding the added files since last sync period.
+        @param fs1: the previous file list.
+        @param fs2: the current list.
+        @return : return the relative complement of fs1 in fs2.
+        @rtype  : list
+        @type fs1:  list
+        @type fs2:  list
+        """
+        ###Checking if it's list.
+        self.testIsinstance(fs1, list)
+        self.testIsinstance(fs2, list)
+        ####
+        sets1 = set(fs1)
+        sets2 = set(fs2)
+        sets3 = sets2 - sets1
+        return list(sets3)
+
     def getDatPrevious(self, setFile):
         """
         Getting the app data that last saved from the setting file
@@ -237,3 +257,19 @@ class Utils:
             print "\tError: It must be a %s: %s" % (Type, Instance)
             sys.exit(1)
 
+    def deleteLocalFile(self, dlist):
+        """
+        Deleting the local files that be deleted since last sync period.
+        """
+        for path in dlist:
+            print "\tInfo: The file to be synced in local: %s" % (path)
+            if os.path.isfile(path):
+                print "\tInfo: Deleting the file: %s.." % (path) 
+                os.remove(path)
+            elif os.path.isdir(path):
+                print "\tInfo: Deleting the dir: %s.." % (path) 
+                shutil.rmtree(path)
+            else:
+                print "\tWarning: Unknow file type: %s" % (path)
+                continue
+        

@@ -17,5 +17,5 @@ Sync the modified files by sftp protocol.
 
 You must excute the run.py in '_rootDir/Engine' dir of syncSftp to setup sync.
 ------
-And deleting 'Settings/currenttime' file when you first run this program.
+And deleting 'Settings/currenttime' if the file exist when you first run this program.
 ------

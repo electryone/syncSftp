@@ -193,15 +193,10 @@ class syncSftp:
         self._rMFList, self._rMDList = self.utilities.mfsInfo(self._rFList, self._lastCheckTime)
         self.createDirLocal(self._rMDList)
         #self.sftp.get('/opt/Twisted/clientFactory.py', os.path.join('/tmp', 'clientFactory.py'))
-        for f in self._rMFList:
+        for rf in self._rMFList:
             ###### The new local path to get the modified file ######
-            lf = self.utilities.path2nPath(self.desDir, self.localDir, f)
-            try:
-                print "\tInfo: Getting the file from remote: %s.." % (f) 
-                self.sftp.get(f, lf)
-            except IOError, e:
-                print "\tError: Getting the file from remote: %s: %s" % (f, e)
-                sys.exit(1)
+            lf = self.utilities.path2nPath(self.desDir, self.localDir, rf)
+            self.sftpUtils1.getFile(rf, lf)
     #####Removing some files ###############
         ###If it's the initial process, it won't have the cleaned actions
         if self.initial:
@@ -216,16 +211,11 @@ class syncSftp:
         print "Modifying remote.."
         self._lMFList, self._lMDList = self.utilities.mfsInfo(self._lFList, self._lastCheckTime)
         self.createDirRemote(self._lMDList)
-        for f in self._lMFList:
+        for lf in self._lMFList:
             ##### The new remote path to put the modified file ####
-            rf = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], f)
+            rf = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], lf)
             #print "putLMFs():rf: %s" % (rf)
-            try:
-                print "\tInfo: Putting the file to remote: %s.." % (f) 
-                self.sftp.put(f, rf)
-            except IOError, e:
-                print "\tError: Putting the file to remote: %s: %s" % (f, e)
-                sys.exit(1)
+            self.sftpUtils1.putFile(lf, rf)
     #####Removing some files ###############
         ###If it's the initial process, it won't have the cleaned actions
         if self.initial:
@@ -263,10 +253,15 @@ class syncSftp:
                 print "\tInfo: It's not a Proper subset:  rl(%s),ll(%s)" % (rl, ll)
                 continue
 
+
+
     def cleanLocalFile(self):
         """
-        Cleaning the local files that be deleted since last sync period.
+        Cleaning the local files that be deleted and added since last sync period.
         """
+        #The local file list that are going to be deleted.
+        2deletedLocalFs = []
+
         lastRFList = self.preSettings.get('_rFList')
         ###Chopping off some attributes
         lastFsChopped = self.utilities.chopAttr(lastRFList)
@@ -274,27 +269,30 @@ class syncSftp:
         print "\tInfo: The previous file list in remote: %s" % (lastFsChopped)
         print "\tInfo: The current file list in remote: %s" % (curFsChopped)
         #print "lastFsChopped: %s\ncurFsChopped: %s" % (lastFsChopped, curFsChopped)
-        ####Getting the deleted file list 
+        ####Processing the deleted file list in local. 
         deletedFListOrgin = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
         deletedFList = sorted(deletedFListOrgin, reverse=True)
         print "\tInfo: The deleted file list in remote: %s" % (deletedFList)
         for path in deletedFList:
             lPath = self.utilities.path2nPath(self.desDir, self.localDir, path)
-            print "\tInfo: The file to be synced in local: %s" % (lPath)
-            if os.path.isfile(lPath):
-                print "\tInfo: Deleting the file: %s.." % (lPath) 
-                os.remove(lPath)
-            elif os.path.isdir(lPath):
-                print "\tInfo: Deleting the dir: %s.." % (lPath) 
-                shutil.rmtree(lPath)
-            else:
-                print "\tWarning: Unknow file type: %s" % (lPath)
-                continue
+            2deletedLocalFs.append(lPath)
+        self.utilities.deleteLocalFile(2deletedLocalFs)
+        ####Processing the added file list in local. 
+        addedFListOrgin = self.utilities.getAddedFiles(lastFsChopped, curFsChopped)
+        addedFList = sorted(addedFListOrgin, reverse=False)
+        print "\tInfo: The added file list in remote: %s" % (addedFList)
+        for path in addedFList:
+            lPath = self.utilities.path2nPath(self.desDir, self.localDir, path)
+            self.sftpUtils1.getFile(path, lPath)
+
 
     def cleanRemoteFile(self):
         """
-        Cleaning the remote files that be deleted since last sync period.
+        Cleaning the remote files that be deleted and added since last sync period.
         """
+        #The local file list that are going to be deleted.
+        2deletedRemoteFs = []
+
         lastLFList = self.preSettings.get('_lFList')
         ###Chopping off some attributes
         lastFsChopped = self.utilities.chopAttr(lastLFList)
@@ -308,17 +306,15 @@ class syncSftp:
         print "\tInfo: The deleted file list in local: %s" % (deletedFList)
         for path in deletedFList:
             rPath = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], path)
-            print "\tInfo: The file to be synced in remote: %s" % (rPath)
-            if self.sftpPath1.isfile(rPath):
-                print "\tInfo: Deleting the file: %s.." % (rPath) 
-                self.sftp.remove(rPath)
-            elif self.sftpPath1.isdir(rPath):
-                print "\tInfo: Deleting the dir: %s.." % (rPath) 
-                self.sftpUtils1.rmtree(rPath)
-            else:
-                print "\tWarning: Unknow file type: %s" % (rPath)
-                continue
-
+            2deletedRemoteFs.append(rPath)
+        self.sftpUtils1.deleteRemoteFile(2deletedRemoteFs)
+        ####Processing the added file list in remote. 
+        addedFListOrgin = self.utilities.getAddedFiles(lastFsChopped, curFsChopped)
+        addedFList = sorted(addedFListOrgin, reverse=False)
+        print "\tInfo: The added file list in local: %s" % (addedFList)
+        for path in addedFList:
+            rPath = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], path)
+            self.sftpUtils1.putFile(path, rPath)
 
     def rmRemoteFile(self, ldl):
         """
