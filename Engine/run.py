@@ -19,6 +19,7 @@ from Products.syncSftp import syncSftp
 def run():
     x = syncSftp('172.16.200.153', 'tcc', 'tcc', 22, '/opt/zenpacks/dir11', '/tmp/zenpacks')
     x.sshConn()
+    x.checkUserEntered()
     x.getFList()
     #print "%s %s\n\n\n" % (x._rFList, len(x._rFList))
     #print "%s %s\n\n\n" % (x._lFList, len(x._lFList))

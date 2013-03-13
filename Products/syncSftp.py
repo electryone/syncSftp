@@ -78,10 +78,27 @@ class syncSftp:
         self.port = port
         self.desDir = desDir
         self.localDir = localDir
-        #### Some Initial action ######
-        self.utilities.checkPath(self.localDir)
-        self.utilities.checkPath(self.desDir)
-        self.createIniDir()
+
+    def checkUserEntered(self):
+        """
+        Checking the path that user has entered. The path must be abosulte, standard and exists.
+        """
+        ##For local path
+        if not os.path.isabs(self.localDir):
+            print "Error: The local path that you have entered is not absolute: %s" % (self.localDir)
+            sys.exit(1)
+        elif not os.path.exists(self.localDir):
+            print "Error: The local path that you have entered is not exists: %s" % (self.localDir)
+            sys.exit(1)
+        ##For remote path
+        elif not os.path.isabs(self.desDir): 
+            print "Error: The remote path that you have entered is not absolute:  %s" % (self.desDir)
+            sys.exit(1)
+        elif not self.sftpPath1.exists(self.desDir):
+            print "Error: The remote path that you have entered is not exists: %s" % (self.desDir)
+            sys.exit(1)
+        else:
+            pass
 
     def getLastCheckTime(self):
         """
@@ -130,6 +147,8 @@ class syncSftp:
         """
         Getting the _lFList and _rFList's value.
         """
+        #### Some Initial action ######
+        self.createIniDir()
         self._lFList = self.getLFList()
         self._rFList = self.getRFList()
 
@@ -375,6 +394,8 @@ class syncSftp:
         close ssh connection.
         """ 
         self.ssht.close()
+
+
 
 
 
