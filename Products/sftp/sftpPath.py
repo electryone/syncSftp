@@ -7,7 +7,7 @@ __doc__ = """sftpPath
 This module implements some functions on pathnames.
 """
 
-import sys
+import os, sys
 
 class sftpPath:
     def __init__(self, sftp):
@@ -90,6 +90,13 @@ class sftpPath:
         else:
             return False
 
-
-
+    def checkPath(self, path):
+        """
+        Checking the path that user has entered. The path must be abosulte, standard and exists.
+        """
+        if os.path.isabs(path) and self.exists(path):
+            pass
+        else:
+            print "Error: The path isn't exists or absolute: %s" % (path)
+            sys.exit(1)
 

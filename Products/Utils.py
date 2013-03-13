@@ -15,12 +15,12 @@ import re
 class Utils:
     def checkPath(self, path):
         """
-        Checking the path that user has entered. The path must be abosulte and standard.
+        Checking the path that user has entered. The path must be abosulte, standard and exists.
         """
-        if os.path.isabs(path):
+        if os.path.isabs(path) and os.path.exists(path):
             pass
         else:
-            print "Error: Please enter the absolute path: %s" % (path)
+            print "Error: The path isn't exists or absolute: %s" % (path)
             sys.exit(1)
 
     def path2list(self, path):
