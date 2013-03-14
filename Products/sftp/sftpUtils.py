@@ -5,6 +5,7 @@ __doc__ = """syncUtils
 General utility functions module about sftp.
 """
 from sftpPath import sftpPath
+import sys
 
 class sftpUtils(sftpPath):
     def __init__(self, sftp):
@@ -92,7 +93,7 @@ class sftpUtils(sftpPath):
                 print "\tWarning: Unknow file type: %s" % (path)
                 continue
 
-    def getFile(self, rf, lf)
+    def getFile(self, rf, lf):
         """
         Getting some files by sftp
         """
@@ -103,7 +104,7 @@ class sftpUtils(sftpPath):
             print "\tError: Getting the file from remote: %s: %s" % (rf, e)
             sys.exit(1)
 
-    def putFile(self, lf, rf)
+    def putFile(self, lf, rf):
         try:
             print "\tInfo: Putting the file to remote: %s.." % (lf) 
             self.sftp.put(lf, rf)

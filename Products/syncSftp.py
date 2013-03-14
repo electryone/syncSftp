@@ -260,7 +260,7 @@ class syncSftp:
         Cleaning the local files that be deleted and added since last sync period.
         """
         #The local file list that are going to be deleted.
-        2deletedLocalFs = []
+        tobeDeletedLocalFs = []
 
         lastRFList = self.preSettings.get('_rFList')
         ###Chopping off some attributes
@@ -275,8 +275,8 @@ class syncSftp:
         print "\tInfo: The deleted file list in remote: %s" % (deletedFList)
         for path in deletedFList:
             lPath = self.utilities.path2nPath(self.desDir, self.localDir, path)
-            2deletedLocalFs.append(lPath)
-        self.utilities.deleteLocalFile(2deletedLocalFs)
+            tobeDeletedLocalFs.append(lPath)
+        self.utilities.deleteLocalFile(tobeDeletedLocalFs)
         ####Processing the added file list in local. 
         addedFListOrgin = self.utilities.getAddedFiles(lastFsChopped, curFsChopped)
         addedFList = sorted(addedFListOrgin, reverse=False)
@@ -291,7 +291,7 @@ class syncSftp:
         Cleaning the remote files that be deleted and added since last sync period.
         """
         #The local file list that are going to be deleted.
-        2deletedRemoteFs = []
+        tobeDeletedRemoteFs = []
 
         lastLFList = self.preSettings.get('_lFList')
         ###Chopping off some attributes
@@ -306,8 +306,8 @@ class syncSftp:
         print "\tInfo: The deleted file list in local: %s" % (deletedFList)
         for path in deletedFList:
             rPath = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], path)
-            2deletedRemoteFs.append(rPath)
-        self.sftpUtils1.deleteRemoteFile(2deletedRemoteFs)
+            tobeDeletedRemoteFs.append(rPath)
+        self.sftpUtils1.deleteRemoteFile(tobeDeletedRemoteFs)
         ####Processing the added file list in remote. 
         addedFListOrgin = self.utilities.getAddedFiles(lastFsChopped, curFsChopped)
         addedFList = sorted(addedFListOrgin, reverse=False)
