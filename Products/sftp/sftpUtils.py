@@ -24,27 +24,27 @@ class sftpUtils(sftpPath):
         Notice this is a recursive function.
         """
         fs = self.sftp.listdir(path)
-        #print "fs: %s" % (fs)
+        #print "fs: '%s'" % (fs)
         for f in fs:
             absfs = path + '/' + f
-            #print "absfs: %s" % (absfs)
+            #print "absfs: '%s'" % (absfs)
             if self.isdir(absfs):
                 if self.isEmptyDir(absfs):
-                    #print "\tInfo: Deleting the dir: %s.." % (absfs) 
+                    #print "\tInfo: Deleting the dir: '%s'.." % (absfs) 
                     self.sftp.rmdir(absfs)
                 else:
-                    #print "absfs: %s" % (absfs)
+                    #print "absfs: '%s'" % (absfs)
                     self.rmtree(absfs)
             elif self.isfile(absfs):
-                #print "\tInfo: Deleting the file: %s.." % (absfs) 
+                #print "\tInfo: Deleting the file: '%s'.." % (absfs) 
                 self.sftp.remove(absfs)
             elif self.islink(absfs):
-                #print "\tInfo: Deleting the link: %s.." % (absfs) 
+                #print "\tInfo: Deleting the link: '%s'.." % (absfs) 
                 self.sftp.unlink(absfs)
             else:
-                print "\tWarning: Unknow file type: %s" % (absfs)
+                print "\tWarning: Unknow file type: '%s'" % (absfs)
         ######
-        #print "\tInfo: Deleting the dir: %s.." % (path) 
+        #print "\tInfo: Deleting the dir: '%s'.." % (path) 
         self.sftp.rmdir(path)
 
     def getfstree(self, dir):
@@ -64,18 +64,21 @@ class sftpUtils(sftpPath):
             for f in fs:
                 #fPath = os.path.join(dir, f)
                 fPath = dir + '/' + f
-                fstat = sftp.stat(fPath)
+                fstat = sftp.lstat(fPath)
                 fType = str(fstat)[0]
+                #print "%s %s" % (f, fType)
                 fMtime = fstat.st_mtime
                 if fType == "d":
                     ftree.append(('d', fMtime, fPath))
                     ftree += getfstree1(sftp, fPath) 
-                elif fType == "f":
+                elif fType == "-":
                     ftree.append(('f', fMtime, fPath))
                 elif fType == "l":
-                    ftree.append(('l', fMtime, fPath))
+                    print "\tWarning: This is a Symbolic Links file, it will not be sync: '%s'" % (fPath)
+                    continue
+                    #ftree.append(('l', fMtime, fPath))
                 else:
-                    print "\tWarning: Unknow file type: %s" % (fType)
+                    print "\tWarning: Unknow file type: '%s'" % (fType)
             return ftree
         ##### Plus the attribute of parent dir to the result list##############
         ftree = [('d', sftp.stat(dir).st_mtime, dir)] + getfstree1(sftp, dir)
@@ -86,15 +89,15 @@ class sftpUtils(sftpPath):
         Deleting the remote files that be deleted since last sync period.
         """
         for path in dlist:
-            print "\tInfo: The file to be synced in remote: %s" % (path)
+            print "\tInfo: The file to be synced in remote: '%s'" % (path)
             if self.isfile(path):
-                print "\tInfo: Deleting the file: %s.." % (path) 
+                print "\tInfo: Deleting the file: '%s'.." % (path) 
                 self.sftp.remove(path)
             elif self.isdir(path):
-                print "\tInfo: Deleting the dir: %s.." % (path) 
+                print "\tInfo: Deleting the dir: '%s'.." % (path) 
                 self.rmtree(path)
             else:
-                print "\tWarning: Unknow file type: %s" % (path)
+                print "\tWarning: Unknow file type: '%s'" % (path)
                 continue
 
     def getFile(self, rf, lf):
@@ -102,17 +105,17 @@ class sftpUtils(sftpPath):
         Getting some files by sftp
         """
         try:
-            print "\tInfo: Getting the file from remote: %s.." % (rf) 
+            print "\tInfo: Getting the file from remote: '%s'.." % (rf) 
             self.sftp.get(rf, lf)
         except IOError, e:
-            print "\tError: Getting the file from remote: %s: %s" % (rf, e)
+            print "\tError: Getting the file from remote: '%s': '%s'" % (rf, e)
             sys.exit(1)
 
     def putFile(self, lf, rf):
         try:
-            print "\tInfo: Putting the file to remote: %s.." % (lf) 
+            print "\tInfo: Putting the file to remote: '%s'.." % (lf) 
             self.sftp.put(lf, rf)
         except IOError, e:
-            print "\tError: Putting the file to remote: %s: %s" % (lf, e)
+            print "\tError: Putting the file to remote: '%s': '%s'" % (lf, e)
             sys.exit(1)
 

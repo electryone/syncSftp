@@ -85,17 +85,17 @@ class syncSftp:
         """
         ##For local path
         if not os.path.isabs(self.localDir):
-            print "Error: The local path that you have entered is not absolute: %s" % (self.localDir)
+            print "Error: The local path that you have entered is not absolute: '%s'" % (self.localDir)
             sys.exit(1)
         elif not os.path.exists(self.localDir):
-            print "Error: The local path that you have entered is not exists: %s" % (self.localDir)
+            print "Error: The local path that you have entered is not exists: '%s'" % (self.localDir)
             sys.exit(1)
         ##For remote path
         elif not os.path.isabs(self.desDir): 
-            print "Error: The remote path that you have entered is not absolute:  %s" % (self.desDir)
+            print "Error: The remote path that you have entered is not absolute:  '%s'" % (self.desDir)
             sys.exit(1)
         elif not self.sftpPath1.exists(self.desDir):
-            print "Error: The remote path that you have entered is not exists: %s" % (self.desDir)
+            print "Error: The remote path that you have entered is not exists: '%s'" % (self.desDir)
             sys.exit(1)
         else:
             pass
@@ -113,7 +113,7 @@ class syncSftp:
                 print "Info: Initializing sync.."
             else:
                 self.initial = False 
-                print "Last check Time: %s" % (time.strftime("%Y-%m-%d,%H:%M:%S",time.localtime(self._lastCheckTime)))
+                print "Last check Time: '%s'" % (time.strftime("%Y-%m-%d,%H:%M:%S",time.localtime(self._lastCheckTime)))
         else:
             self.initial = True
             print "Info: Initializing sync.."
@@ -157,7 +157,7 @@ class syncSftp:
         Create the initial directory in the local.
         """
         dirBase = os.path.basename(self.desDir)
-        #print "createInidir():dirBase: %s" % (dirBase)
+        #print "createInidir():dirBase: '%s'" % (dirBase)
         iniDir = os.path.join(self.localDir, dirBase)
         self.utilities.mkdirIfNotExists(iniDir)
 
@@ -171,7 +171,7 @@ class syncSftp:
                 ld = self.utilities.path2nPath(self.desDir, self.localDir, dir)
                 self.utilities.mkdirIfNotExists(ld)
         else:
-            print "\tError: This is not a list: %s" % (dList)
+            print "\tError: This is not a list: '%s'" % (dList)
             
     def createDirRemote(self, dList):
         """
@@ -183,7 +183,7 @@ class syncSftp:
                 rd = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], dir)
                 self.sftpPath1.mkdirIfNotExists(rd)
         else:
-            print "\tError: This is not a list: %s" % (dList)
+            print "\tError: This is not a list: '%s'" % (dList)
 
     def getRMFs(self):
         """
@@ -191,6 +191,7 @@ class syncSftp:
         """
         print "Modifying local.."
         self._rMFList, self._rMDList = self.utilities.mfsInfo(self._rFList, self._lastCheckTime)
+        #print "self._rMFList %s %s" % (self._rMFList, self._rMDList)
         self.createDirLocal(self._rMDList)
         #self.sftp.get('/opt/Twisted/clientFactory.py', os.path.join('/tmp', 'clientFactory.py'))
         for rf in self._rMFList:
@@ -214,7 +215,7 @@ class syncSftp:
         for lf in self._lMFList:
             ##### The new remote path to put the modified file ####
             rf = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], lf)
-            #print "putLMFs():rf: %s" % (rf)
+            #print "putLMFs():rf: '%s'" % (rf)
             self.sftpUtils1.putFile(lf, rf)
     #####Removing some files ###############
         ###If it's the initial process, it won't have the cleaned actions
@@ -232,22 +233,22 @@ class syncSftp:
             ndir = self.utilities.path2nPath(self.desDir, self.localDir, dir)
             rl = self.sftp.listdir(dir)
             ll = os.listdir(ndir)
-            print "\tInfo: rl: %s ll: %s" % (rl, ll)
+            print "\tInfo: rl: '%s' ll: '%s'" % (rl, ll)
             rl = set(rl)
             ll = set(ll)
             if self.utilities.isProperSubset(rl, ll):
                 result = ll - rl
-                print "\tInfo: rmLocalFile(): result: %s" % (result)
+                print "\tInfo: rmLocalFile(): result: '%s'" % (result)
                 for path in result:
                     path = os.path.join(ndir, path)
                     if os.path.isfile(path):
-                        print "\tInfo: Deleting the file: %s.." % (path) 
+                        print "\tInfo: Deleting the file: '%s'.." % (path) 
                         os.remove(path)
                     elif os.path.isdir(path):
-                        print "\tInfo: Deleting the dir: %s.." % (path) 
+                        print "\tInfo: Deleting the dir: '%s'.." % (path) 
                         shutil.rmtree(path)
                     else:
-                        print "\tWarning: Unknow file type: %s" % (path)
+                        print "\tWarning: Unknow file type: '%s'" % (path)
                         continue
             else:
                 print "\tInfo: It's not a Proper subset:  rl(%s),ll(%s)" % (rl, ll)
@@ -266,13 +267,13 @@ class syncSftp:
         ###Chopping off some attributes
         lastFsChopped = self.utilities.chopAttr(lastRFList)
         curFsChopped = self.utilities.chopAttr(self._rFList)
-        print "\tInfo: The previous file list in remote: %s" % (lastFsChopped)
-        print "\tInfo: The current file list in remote: %s" % (curFsChopped)
-        #print "lastFsChopped: %s\ncurFsChopped: %s" % (lastFsChopped, curFsChopped)
+        print "\tInfo: The previous file list in remote: '%s'" % (lastFsChopped)
+        print "\tInfo: The current file list in remote: '%s'" % (curFsChopped)
+        #print "lastFsChopped: '%s'\ncurFsChopped: '%s'" % (lastFsChopped, curFsChopped)
         ####Processing the deleted file list in local. 
         deletedFListOrgin = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
         deletedFList = sorted(deletedFListOrgin, reverse=True)
-        print "\tInfo: The deleted file list in remote: %s" % (deletedFList)
+        print "\tInfo: The deleted file list in remote: '%s'" % (deletedFList)
         for path in deletedFList:
             lPath = self.utilities.path2nPath(self.desDir, self.localDir, path)
             tobeDeletedLocalFs.append(lPath)
@@ -280,7 +281,7 @@ class syncSftp:
         ####Processing the added file list in local. 
         addedFListOrgin = self.utilities.getAddedFiles(lastFsChopped, curFsChopped)
         addedFList = sorted(addedFListOrgin, reverse=False)
-        print "\tInfo: The added file list in remote: %s" % (addedFList)
+        print "\tInfo: The added file list in remote: '%s'" % (addedFList)
         for path in addedFList:
             lPath = self.utilities.path2nPath(self.desDir, self.localDir, path)
             self.sftpUtils1.getFile(path, lPath)
@@ -297,13 +298,13 @@ class syncSftp:
         ###Chopping off some attributes
         lastFsChopped = self.utilities.chopAttr(lastLFList)
         curFsChopped = self.utilities.chopAttr(self._lFList)
-        print "\tInfo: The previous file list in local: %s" % (lastFsChopped)
-        print "\tInfo: The current file list in local: %s" % (curFsChopped)
-        #print "lastFsChopped: %s\ncurFsChopped: %s" % (lastFsChopped, curFsChopped)
+        print "\tInfo: The previous file list in local: '%s'" % (lastFsChopped)
+        print "\tInfo: The current file list in local: '%s'" % (curFsChopped)
+        #print "lastFsChopped: '%s'\ncurFsChopped: '%s'" % (lastFsChopped, curFsChopped)
         ####Getting the deleted file list 
         deletedFListOrgin = self.utilities.getDeletedFiles(lastFsChopped, curFsChopped)
         deletedFList = sorted(deletedFListOrgin, reverse=True)
-        print "\tInfo: The deleted file list in local: %s" % (deletedFList)
+        print "\tInfo: The deleted file list in local: '%s'" % (deletedFList)
         for path in deletedFList:
             rPath = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], path)
             tobeDeletedRemoteFs.append(rPath)
@@ -311,7 +312,7 @@ class syncSftp:
         ####Processing the added file list in remote. 
         addedFListOrgin = self.utilities.getAddedFiles(lastFsChopped, curFsChopped)
         addedFList = sorted(addedFListOrgin, reverse=False)
-        print "\tInfo: The added file list in local: %s" % (addedFList)
+        print "\tInfo: The added file list in local: '%s'" % (addedFList)
         for path in addedFList:
             rPath = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], path)
             self.sftpUtils1.putFile(path, rPath)
@@ -325,22 +326,22 @@ class syncSftp:
             ndir = self.utilities.path2nPath(self.desDir, os.path.split(self.desDir)[0], dir)
             ll = os.listdir(dir)
             rl = self.sftp.listdir(ndir)
-            print "\tInfo: ll: %s rl: %s" % (ll, rl)
+            print "\tInfo: ll: '%s' rl: '%s'" % (ll, rl)
             ll = set(ll)
             rl = set(rl)
             if self.utilities.isProperSubset(ll, rl):
                 result = rl - ll
-                print "\tInfo: rmLocalFile(): result: %s" % (result)
+                print "\tInfo: rmLocalFile(): result: '%s'" % (result)
                 for path in result:
                     #tpath = os.path.join(dir, path)
                     path = ndir + '/' + path
                     if self.sftpPath1.isfile(path):
-                        print "\tInfo: Deleting the file: %s.." % (path) 
+                        print "\tInfo: Deleting the file: '%s'.." % (path) 
                         self.sftp.remove(path)
                     elif self.sftpPath1.isdir(path):
                         self.sftpUtils1.rmtree(path)
                     else:
-                        print "\tWarning: Unknow file type: %s" % (path)
+                        print "\tWarning: Unknow file type: '%s'" % (path)
                         continue
             else:
                 print "\tInfo: ll(%s) is not a Proper subset of rl(%s)" % (ll, rl)
@@ -356,7 +357,7 @@ class syncSftp:
         try:
             ssht.connect(username=self.username, password=self.password)
         except Exception, err:
-            print "Error: Connect remote host: %s" % err
+            print "Error: Connect remote host: '%s'" % err
             print "Quiting, please wait for a moment..."
             sys.exit(1)
         print 'Info: Successful: ssh connection'
@@ -378,7 +379,7 @@ class syncSftp:
         ft.close()
         ####################################
         fp = open(self.datPreFile, 'w')
-        #wstr = "_lFList = %s\n_rFList = %s" % (self._lFList, self._rFList)
+        #wstr = "_lFList = '%s'\n_rFList = '%s'" % (self._lFList, self._rFList)
         lList = self.getLFList()
         rList = self.getRFList()
         wlist = [('_lFList', lList), ('_rFList', rList)]

@@ -23,6 +23,8 @@ def run():
     x.getFList()
     #print "%s %s\n\n\n" % (x._rFList, len(x._rFList))
     #print "%s %s\n\n\n" % (x._lFList, len(x._lFList))
+    #print x._rMFList
+    #print "x._rMFList %s\n\n\n" % (x._rMFList)
     print "The number of remote files: %s" % (len(x._rFList))
     print "The number of local files: %s" % (len(x._lFList))
     x.getLastCheckTime()

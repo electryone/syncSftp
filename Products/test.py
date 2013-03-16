@@ -14,11 +14,11 @@ class test:
         t = paramiko.Transport(('172.16.200.153', 22))
         t.connect(username='tcc', password='tcc')
         self.sftp = paramiko.SFTPClient.from_transport(t)
-        #print sftp.stat('/opt/zenpacks/dir2/2.1')
+        print self.sftp.lstat('/opt/zenpacks/dir11/zenpacks')
         #print sftp.listdir('/opt/zenpacks/dir2/2.1')
         #sftpPath = sftp.path()
         #print sftpPath.exists('/tmp/dir')
-        print sftpPath(self.sftp).exists('/tmp/dir1')
+        #print sftpPath(self.sftp).exists('/tmp/dir1')
 
     def testList(self):
         l = ['a', 'b']
@@ -145,10 +145,10 @@ class test:
 if __name__ == "__main__":
     #a = mysum([1, 2, 3, 4, 5])
     x = test()
-    x.testList()
+    #x.testList()
     #x.writeFile()
     #x.readFile()
-    #x.sshConn()
+    x.sshConn()
     #print sftpGetFtree('/opt/zenpacks/dir2')
     #print a, len(a)
     #print x.sftpPathIsdir('/tmp/dir2')

@@ -30,7 +30,7 @@ class sftpPath:
         try:
             ssht.connect(username=username, password=password)
         except Exception, err:
-            print "Error: Connect remote host: %s" % err
+            print "Error: Connect remote host: '%s'" % err
             print "Quiting, please wait for a moment..."
             sys.exit(1)
         print 'Info: Successful: ssh connection'
@@ -43,7 +43,7 @@ class sftpPath:
         try:
             self.sftp.stat(path)
         except:
-            #print "exists: The path is not exist: %s" (path)
+            #print "exists: The path is not exist: '%s'" (path)
             return False
         else:
             return True
@@ -53,7 +53,7 @@ class sftpPath:
         Create the dir that isn't exist by sftp.
         """
         if not  self.exists(dir):
-            print "\tInfo: Create the dir: %s.." % (dir)
+            print "\tInfo: Create the dir: '%s'.." % (dir)
             self.sftp.mkdir(dir)
 
     # Some below functions are used to check the file's type by sftp.
@@ -97,6 +97,6 @@ class sftpPath:
         if os.path.isabs(path) and self.exists(path):
             pass
         else:
-            print "Error: The path isn't exists or absolute: %s" % (path)
+            print "Error: The path isn't exists or absolute: '%s'" % (path)
             sys.exit(1)
 

@@ -20,7 +20,7 @@ class Utils:
         if os.path.isabs(path) and os.path.exists(path):
             pass
         else:
-            print "Error: The path isn't exists or absolute: %s" % (path)
+            print "Error: The path isn't exists or absolute: '%s'" % (path)
             sys.exit(1)
 
     def path2list(self, path):
@@ -35,7 +35,7 @@ class Utils:
             #print 'Linux path'
             plist = path.split('/')[1:]
         else:
-            print "\tError: Unknow path type: %s" % (platsystem)
+            print "\tError: Unknow path type: '%s'" % (platsystem)
             sys.exit(1)
 
         return plist
@@ -66,7 +66,7 @@ class Utils:
             nPath = dir2 + self.list2path(nPathList)
             return nPath
         else:
-            print "\tError: Not absolute path: %s,%s,%s" % (dir1, dir2, path)
+            print "\tError: Not absolute path: '%s',%s,%s" % (dir1, dir2, path)
             sys.exit(1)
 
     def mkdirIfNotExists(self, dir):
@@ -74,7 +74,7 @@ class Utils:
         Create the dir that isn't exist.
         """
         if not os.path.exists(dir):
-            print "\tInfo: Create the dir: %s.." % (dir)
+            print "\tInfo: Create the dir: '%s'.." % (dir)
             os.makedirs(dir)
 
     def mfsInfo(self, fList, tm):
@@ -95,14 +95,18 @@ class Utils:
         mfs = []
         mds = []
         for f in fList:
+            #print f, f[0]
             if f[0] == 'f' and f[1] > tm:
                 mfs.append(f[2])
             elif f[0] == 'd' and f[1] > tm:
                 mds.append(f[2])
-            elif f[0] != 'd' and f[0] != 'f' or f[1] < 0: 
-                print "\tWarning: Unknow file format: %s" % (f)
+            elif f[0] == 'l'  and f[1] > tm:
+                print "\tWarning: This is a Symbolic Links file, it will not be sync: '%s'" % (f[2])
                 continue
-        print "\tInfo: The number of file to be modified are: file: %s dir: %s" % (len(mfs), len(mds))
+            elif f[0] != 'd' and f[0] != 'f' and f[0] != 'l' or f[1] < 0: 
+                print "\tWarning: Unknow file format: '%s'" % (f[2])
+                continue
+        print "\tInfo: The number of file to be modified are: file: '%s' dir: '%s'" % (len(mfs), len(mds))
         return (mfs, mds)
 
     def dirList(self, fList):
@@ -118,7 +122,7 @@ class Utils:
             if f[0] == "d":
                 ds.append(f)
             elif f[0] != 'd' and f[0] != 'f' or f[1] < 0: 
-                print "\tWarning: Unknow file format: %s" % (f)
+                print "\tWarning: Unknow file format: '%s'" % (f)
                 continue
         return ds
 
@@ -147,7 +151,7 @@ class Utils:
         """
         def getFtree1(dir):
             fs = os.listdir(dir)
-            #print "getFtree1(): dir: %s fs: %s" % (dir, fs)
+            #print "getFtree1(): dir: '%s' fs: '%s'" % (dir, fs)
             ftree = []
             for f in fs:
                 fPath = os.path.join(dir, f)
@@ -219,10 +223,10 @@ class Utils:
         try:
             wlist = pickle.loads(string)
         except EOFError:
-            print "Error: EOF Error: %s" % (setFile)
+            print "Error: EOF Error: '%s'" % (setFile)
             sys.exit(1)
         datPrevious = dict(wlist)
-        #print "datPrevious: %s" % datPrevious
+        #print "datPrevious: '%s'" % datPrevious
         return datPrevious
         
     def chopAttr(self, fList):
@@ -235,7 +239,7 @@ class Utils:
         ###Checking if it's list.
         self.testIsinstance(fList, list)
         ####
-        #print "fList: %s" % (fList)
+        #print "fList: '%s'" % (fList)
         #print type(fList)
         fs = []
         for f in fList:
@@ -254,7 +258,7 @@ class Utils:
         if isinstance(Instance, Type):
             pass
         else:
-            print "\tError: It must be a %s: %s" % (Type, Instance)
+            print "\tError: It must be a '%s': '%s'" % (Type, Instance)
             sys.exit(1)
 
     def deleteLocalFile(self, dlist):
@@ -262,14 +266,14 @@ class Utils:
         Deleting the local files that be deleted since last sync period.
         """
         for path in dlist:
-            print "\tInfo: The file to be synced in local: %s" % (path)
+            print "\tInfo: The file to be synced in local: '%s'" % (path)
             if os.path.isfile(path):
-                print "\tInfo: Deleting the file: %s.." % (path) 
+                print "\tInfo: Deleting the file: '%s'.." % (path) 
                 os.remove(path)
             elif os.path.isdir(path):
-                print "\tInfo: Deleting the dir: %s.." % (path) 
+                print "\tInfo: Deleting the dir: '%s'.." % (path) 
                 shutil.rmtree(path)
             else:
-                print "\tWarning: Unknow file type: %s" % (path)
+                print "\tWarning: Unknow file type: '%s'" % (path)
                 continue
         
