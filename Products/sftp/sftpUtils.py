@@ -70,8 +70,12 @@ class sftpUtils(sftpPath):
                 if fType == "d":
                     ftree.append(('d', fMtime, fPath))
                     ftree += getfstree1(sftp, fPath) 
-                else:
+                elif fType == "f":
                     ftree.append(('f', fMtime, fPath))
+                elif fType == "l":
+                    ftree.append(('l', fMtime, fPath))
+                else:
+                    print "\tWarning: Unknow file type: %s" % (fType)
             return ftree
         ##### Plus the attribute of parent dir to the result list##############
         ftree = [('d', sftp.stat(dir).st_mtime, dir)] + getfstree1(sftp, dir)
