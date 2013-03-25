@@ -190,7 +190,7 @@ class syncSftp:
         Getting the modified files from remote dir.
         """
         print "Modifying local.."
-        self._rMFList, self._rMDList = self.utilities.mfsInfo(self._rFList, self._lastCheckTime)
+        self._rMFList, self._rMDList = self.utilities.mfsInfo(self.utilities.removeLinkAttr(self._rFList), self._lastCheckTime)
         #print "self._rMFList %s %s" % (self._rMFList, self._rMDList)
         self.createDirLocal(self._rMDList)
         #self.sftp.get('/opt/Twisted/clientFactory.py', os.path.join('/tmp', 'clientFactory.py'))
@@ -210,7 +210,7 @@ class syncSftp:
         Putting the modified files from local dir to the remote dir.
         """
         print "Modifying remote.."
-        self._lMFList, self._lMDList = self.utilities.mfsInfo(self._lFList, self._lastCheckTime)
+        self._lMFList, self._lMDList = self.utilities.mfsInfo(self.utilities.removeLinkAttr(self._lFList), self._lastCheckTime)
         self.createDirRemote(self._lMDList)
         for lf in self._lMFList:
             ##### The new remote path to put the modified file ####
@@ -266,7 +266,7 @@ class syncSftp:
         lastRFList = self.preSettings.get('_rFList')
         ###Chopping off some attributes
         lastFsChopped = self.utilities.chopAttr(lastRFList)
-        curFsChopped = self.utilities.chopAttr(self._rFList)
+        curFsChopped = self.utilities.chopAttr(self.utilities.removeLinkAttr(self._rFList))
         print "\tInfo: The previous file list in remote: '%s'" % (lastFsChopped)
         print "\tInfo: The current file list in remote: '%s'" % (curFsChopped)
         #print "lastFsChopped: '%s'\ncurFsChopped: '%s'" % (lastFsChopped, curFsChopped)
@@ -297,7 +297,7 @@ class syncSftp:
         lastLFList = self.preSettings.get('_lFList')
         ###Chopping off some attributes
         lastFsChopped = self.utilities.chopAttr(lastLFList)
-        curFsChopped = self.utilities.chopAttr(self._lFList)
+        curFsChopped = self.utilities.chopAttr(self.utilities.removeLinkAttr(self._lFList))
         print "\tInfo: The previous file list in local: '%s'" % (lastFsChopped)
         print "\tInfo: The current file list in local: '%s'" % (curFsChopped)
         #print "lastFsChopped: '%s'\ncurFsChopped: '%s'" % (lastFsChopped, curFsChopped)

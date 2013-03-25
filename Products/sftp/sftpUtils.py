@@ -74,9 +74,9 @@ class sftpUtils(sftpPath):
                 elif fType == "-":
                     ftree.append(('f', fMtime, fPath))
                 elif fType == "l":
-                    print "\tWarning: This is a Symbolic Links file, it will not be sync: '%s'" % (fPath)
-                    continue
-                    #ftree.append(('l', fMtime, fPath))
+                    print "\tWarning: This is a Symbolic Links file, it won't be sync: '%s'" % (fPath)
+                    #continue
+                    ftree.append(('l', fMtime, fPath))
                 else:
                     print "\tWarning: Unknow file type: '%s'" % (fType)
             return ftree

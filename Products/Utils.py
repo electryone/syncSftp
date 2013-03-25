@@ -101,7 +101,7 @@ class Utils:
             elif f[0] == 'd' and f[1] > tm:
                 mds.append(f[2])
             elif f[0] == 'l'  and f[1] > tm:
-                print "\tWarning: This is a Symbolic Links file, it will not be sync: '%s'" % (f[2])
+                print "\tWarning: This is a Symbolic Links file, it won't be sync: '%s'" % (f[2])
                 continue
             elif f[0] != 'd' and f[0] != 'f' and f[0] != 'l' or f[1] < 0: 
                 print "\tWarning: Unknow file format: '%s'" % (f[2])
@@ -276,4 +276,13 @@ class Utils:
             else:
                 print "\tWarning: Unknow file type: '%s'" % (path)
                 continue
-        
+       
+    def removeLinkAttr(self, list):
+        """
+        Removing the attribute that contain link file from a list
+        """
+        rlist = []
+        for x in list:
+            if x[0] != 'l':
+                rlist.append(x)
+        return rlist

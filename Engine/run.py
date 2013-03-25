@@ -21,7 +21,7 @@ def run():
     x.sshConn()
     x.checkUserEntered()
     x.getFList()
-    #print "%s %s\n\n\n" % (x._rFList, len(x._rFList))
+    print "%s %s\n\n\n" % (x._rFList, len(x._rFList))
     #print "%s %s\n\n\n" % (x._lFList, len(x._lFList))
     #print x._rMFList
     #print "x._rMFList %s\n\n\n" % (x._rMFList)
