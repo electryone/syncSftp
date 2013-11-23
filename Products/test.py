@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+
+import os, sys
+import pickle
 import paramiko
 from sftp.sftpPath import sftpPath 
 
@@ -11,18 +14,34 @@ class test:
         t = paramiko.Transport(('172.16.200.153', 22))
         t.connect(username='tcc', password='tcc')
         self.sftp = paramiko.SFTPClient.from_transport(t)
-        #print sftp.stat('/opt/zenpacks/dir2/2.1')
+        print self.sftp.lstat('/opt/zenpacks/dir11/zenpacks')
         #print sftp.listdir('/opt/zenpacks/dir2/2.1')
         #sftpPath = sftp.path()
         #print sftpPath.exists('/tmp/dir')
-        print sftpPath(self.sftp).exists('/tmp/dir1')
+        #print sftpPath(self.sftp).exists('/tmp/dir1')
 
-    def testList():
+    def testList(self):
         l = ['a', 'b']
-        if not l:
-            print "Null"
+        d = {'a': 1, 'b': 2}
+        
+        self.testIsinstance(l, dict)
+        print "It's list: %s" % (l)
+
+    def testIsinstance(self, Instance, Type):
+        """
+        Checking the type of instance.
+        @param Instance: the instance to be checked.
+        @param Type: the type of instance to be checked
+        @return : If the type of instance is right, do nothing. But if not,
+        return some Error and quite the program.
+        """
+        ###Checking if it's list.
+        if isinstance(Instance, Type):
+            pass
         else:
-            print "nonNull"
+            print "\tError: It must be a %s: %s" % (Type, Instance)
+            sys.exit(1)
+
 
     def mysum(L):
         print(L)
@@ -94,12 +113,44 @@ class test:
                         continue
         return "Done" 
 
+   #### The root dir of syncSftp is living.
+    _rootDir = os.path.dirname(os.getcwd())
+    _logDir = os.path.join(_rootDir, 'Logs')
+
+    def writeFile(self):
+        #ws = "('This', 'is')\n('a', 'string.')"
+        #ws = "This is a string."
+        #ws = str(wl)
+        d1 = [('a', 1), ('b', 2)]
+        ds = pickle.dumps(d1)
+        fp = open('/tmp/file1.txt', 'w')
+        fp.write(ds)
+        fp.close()
+
+    def readFile(self):
+        f = open('/tmp/file1.txt', 'r')
+        fl = f.readlines()
+        f.close()
+        print fl
+        for line in fl:
+            pass
+            #print line.strip()
+        #    dl.append(line.strip())
+        #print dl
+        #print type(dl)
+
+
+
 
 if __name__ == "__main__":
     #a = mysum([1, 2, 3, 4, 5])
     x = test()
+    #x.testList()
+    #x.writeFile()
+    #x.readFile()
     x.sshConn()
     #print sftpGetFtree('/opt/zenpacks/dir2')
     #print a, len(a)
     #print x.sftpPathIsdir('/tmp/dir2')
     #x.sftpRmtree('/tmp/dir1')
+    #print x._rootDir, x._logDir
